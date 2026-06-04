@@ -345,18 +345,10 @@ footer{text-align:center;padding:20px 14px 8px;color:var(--muted2);font-size:.65
     <div id="mmtab-bebidas"       onclick="selectMMCat('bebidas')"       style="flex-shrink:0;padding:10px 12px;font-size:.68rem;font-weight:700;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer">🥤 Bebidas</div>
   </div>
   <main style="padding:14px">
-    <div class="kpi-grid" id="mmetas-kpi"></div>
-    <div class="cc" style="margin-bottom:12px;margin-top:12px">
-      <div class="ct">Meta vs Consuntivo <strong>por Mes</strong></div>
-      <div style="height:240px;margin-top:10px"><canvas id="mmch-monthly"></canvas></div>
-    </div>
+    <div class="kpi-grid" id="mmetas-kpi" style="margin-bottom:12px"></div>
     <div class="cc" style="margin-bottom:12px">
-      <div class="ct">Logro <strong>por Sucursal</strong></div>
-      <div style="height:260px;margin-top:10px"><canvas id="mmch-store"></canvas></div>
-    </div>
-    <div class="cc" style="margin-bottom:12px">
-      <div class="ct">Detalle <strong>por Sucursal</strong></div>
-      <div class="tbl-outer" id="mmetas-tbl"></div>
+      <div class="ct">Detalle <strong>Meta vs Consuntivo por Mes</strong></div>
+      <div class="tbl-outer" id="mmetas-tbl" style="margin-top:10px"></div>
     </div>
   </main>
 </div><!-- /mpage-metas -->
@@ -842,8 +834,7 @@ const MMTLB={month:v=>MN[parseInt(v)],store:v=>v};
 let MM_ACTIVE_CAT='ventas';
 
 function mmtBuildOpts(key,items){
-  MMTALL[key]=items;
-  const c=document.getElementById('mmtopts-'+key);
+  MMTALL[key]=items;const c=document.getElementById('mmtopts-'+key);
   c.innerHTML=items.map(v=>`<div class="ms-option"><input type="checkbox" id="mmtchk-${key}-${String(v).replace(/ /g,'_')}" value="${v}" onchange="mmtToggleOpt('${key}','${v}')"><label for="mmtchk-${key}-${String(v).replace(/ /g,'_')}">${MMTLB[key](String(v))}</label></div>`).join('');
   MMTSEL[key]=new Set(items.map(String));mmtUpdateBtn(key);
 }
@@ -879,13 +870,9 @@ function filterMMetas(cat){
   });
 }
 
-function mSem(pct){
-  if(pct===null||pct===undefined)return{color:'#9ca3af',bg:'#f3f4f6'};
-  if(pct>=100)return{color:'#16a34a',bg:'#dcfce7'};
-  if(pct>=80)return{color:'#d97706',bg:'#fef9c3'};
-  return{color:'#dc2626',bg:'#fee2e2'};
-}
-function mFmtVal(cat,v){if(!v&&v!==0)return'—';if(cat==='ventas')return fMoney(v);return fNum(v);}
+function mSem(pct){if(pct===null||pct===undefined)return{color:'#9ca3af',bg:'#f3f4f6'};if(pct>=100)return{color:'#16a34a',bg:'#dcfce7'};if(pct>=80)return{color:'#d97706',bg:'#fef9c3'};return{color:'#dc2626',bg:'#fee2e2'};}
+function mFmtV(cat,v){if(!v&&v!==0)return'—';if(cat==='ventas')return fMoney(v);return fNum(v);}
+function mBadge(pct){const s=mSem(pct);return pct!==null?`<span style="background:${s.bg};color:${s.color};padding:2px 5px;border-radius:4px;font-weight:700;font-size:.7rem">${pct.toFixed(1)}%</span>`:'—';}
 
 function updateMMetas(){
   if(!RAW.metas||!RAW.metas.length) return;
@@ -897,67 +884,41 @@ function updateMMetas(){
   const withP=data.filter(r=>r.pct!==null);
   const g=withP.filter(r=>r.pct>=100).length,y=withP.filter(r=>r.pct>=80&&r.pct<100).length,red=withP.filter(r=>r.pct<80).length;
   const sem=mSem(totP);
+  const catLabel=(RAW.metas_cats||{})[cat]||cat;
 
   document.getElementById('mmetas-kpi').innerHTML=[
-    {icon:'🎯',label:'Meta YTD',val:mFmtVal(cat,totM),yr:'25'},
-    {icon:'📊',label:'Consuntivo YTD',val:mFmtVal(cat,totC),yr:'26'},
+    {icon:'🎯',label:'Meta YTD',val:mFmtV(cat,totM)},
+    {icon:'💰',label:'Consuntivo',val:mFmtV(cat,totC)},
     {icon:'📈',label:'% Logro',val:totP?totP.toFixed(1)+'%':'—',col:sem.color},
-    {icon:'🏪',label:'Sucursales',val:`🟢${g} 🟡${y} 🔴${red}`},
-  ].map(k=>`<div class="kpi"><div class="kpi-icon">${k.icon}</div><div class="kpi-label">${k.label}</div><div class="kpi-val" ${k.col?`style="color:${k.col}"`:k.yr==='26'?'style="color:var(--y26)"':'style="color:var(--y25)"'}>${k.val}</div><div class="kpi-delta neu"></div></div>`).join('');
+    {icon:'🏪',label:'Semaforo',val:`🟢${g} 🟡${y} 🔴${red}`},
+  ].map(k=>`<div class="kpi"><div class="kpi-icon">${k.icon}</div><div class="kpi-label">${k.label}</div><div class="kpi-val" ${k.col?`style="color:${k.col}"`:''}">${k.val}</div><div class="kpi-delta neu">${catLabel}</div></div>`).join('');
 
   const months=[...new Set(data.map(r=>r.month))].sort((a,b)=>a-b);
-  const byMonth={};
-  data.forEach(r=>{if(!byMonth[r.month])byMonth[r.month]={meta:0,cons:0};byMonth[r.month].meta+=r.meta||0;byMonth[r.month].cons+=r.cons;});
-
-  const BASE_M={responsive:true,maintainAspectRatio:false,plugins:{datalabels:{display:false},legend:{display:true,labels:{color:'#6b7280',font:{family:'Inter',size:10},boxWidth:10,padding:8}},tooltip:{backgroundColor:'#1e293b',titleColor:'#94a3b8',bodyColor:'#f1f5f9',padding:8}}};
-  const SCALES_M={x:{grid:{color:'#f0f2f5'},ticks:{color:'#9ca3af',font:{family:'Inter',size:9}}},y:{grid:{color:'#f0f2f5'},ticks:{color:'#9ca3af',font:{family:'Inter',size:9}}}};
-
-  if(charts['mmch-monthly'])charts['mmch-monthly'].destroy();
-  const el1=document.getElementById('mmch-monthly');
-  if(el1){
-    const mPcts=months.map(m=>byMonth[m].meta>0?byMonth[m].cons/byMonth[m].meta*100:null);
-    const bColors=mPcts.map(p=>p===null?'#e5e7eb':p>=100?'rgba(22,163,74,0.8)':p>=80?'rgba(217,119,6,0.8)':'rgba(220,38,38,0.8)');
-    charts['mmch-monthly']=new Chart(el1.getContext('2d'),{type:'bar',
-      data:{labels:months.map(m=>MNS[m]),datasets:[
-        {label:'Meta',data:months.map(m=>byMonth[m].meta),backgroundColor:'rgba(148,163,184,0.3)',borderColor:'#94a3b8',borderWidth:2,borderRadius:3,borderSkipped:false,order:2},
-        {label:'Consuntivo',data:months.map(m=>byMonth[m].cons),backgroundColor:bColors,borderRadius:3,borderSkipped:false,order:1},
-      ]},
-      options:{...BASE_M,scales:SCALES_M}});
-  }
-
-  const byStore={};
-  data.forEach(r=>{if(!byStore[r.store])byStore[r.store]={meta:0,cons:0};byStore[r.store].meta+=r.meta||0;byStore[r.store].cons+=r.cons;});
-  const stores=Object.keys(byStore).sort((a,b)=>(byStore[b].meta>0?byStore[b].cons/byStore[b].meta:0)-(byStore[a].meta>0?byStore[a].cons/byStore[a].meta:0));
-  const sPcts=stores.map(s=>byStore[s].meta>0?+(byStore[s].cons/byStore[s].meta*100).toFixed(1):null);
-  const sColors=sPcts.map(p=>p===null?'#e5e7eb':p>=100?'rgba(22,163,74,0.8)':p>=80?'rgba(217,119,6,0.8)':'rgba(220,38,38,0.8)');
-
-  if(charts['mmch-store'])charts['mmch-store'].destroy();
-  const el2=document.getElementById('mmch-store');
-  if(el2) charts['mmch-store']=new Chart(el2.getContext('2d'),{type:'bar',
-    data:{labels:stores,datasets:[{label:'% Logro',data:sPcts,backgroundColor:sColors,borderRadius:3,borderSkipped:false}]},
-    options:{...BASE_M,indexAxis:'y',scales:{x:{...SCALES_M.x,ticks:{...SCALES_M.x.ticks,callback:v=>v+'%'}},y:SCALES_M.y}}});
-
-  // Simple table by store
   const allS=[...new Set(data.map(r=>r.store))].sort();
-  let html='<table><thead><tr><th>Sucursal</th>';
-  months.forEach(m=>html+=`<th class="num" style="font-size:.6rem">${MNS[m]}</th>`);
-  html+='<th class="num" style="font-size:.6rem">YTD%</th></tr></thead><tbody>';
-  allS.forEach(s=>{
-    const dm={};data.filter(r=>r.store===s).forEach(r=>{dm[r.month]=r;});
-    let ytdM=0,ytdC=0;
-    html+=`<tr><td style="font-size:.75rem"><strong>${s}</strong></td>`;
-    months.forEach(m=>{
-      const r=dm[m];if(r){ytdM+=r.meta||0;ytdC+=r.cons;}
-      const p=r?.pct;const sem=mSem(p);
-      html+=`<td class="num" style="font-size:.7rem">${p!==null&&p!==undefined?`<span style="background:${sem.bg};color:${sem.color};padding:1px 4px;border-radius:3px;font-weight:700">${p}%</span>`:'—'}</td>`;
-    });
-    const ytdP=ytdM>0?ytdC/ytdM*100:null;const ySem=mSem(ytdP);
-    html+=`<td class="num"><span style="background:${ySem.bg};color:${ySem.color};padding:2px 6px;border-radius:4px;font-weight:700;font-size:.72rem">${ytdP?ytdP.toFixed(1)+'%':'—'}</span></td></tr>`;
-  });
-  html+='</tbody></table>';
-  document.getElementById('mmetas-tbl').innerHTML=html;
+  const dm={};data.forEach(r=>{dm[r.store+'_'+r.month]=r;});
 
-  setTimeout(()=>['mmch-monthly','mmch-store'].forEach(id=>{if(charts[id])charts[id].resize();}),100);
+  // Mobile table: store × month (show only % with color, tap for detail)
+  let html='<table><thead><tr><th>Sucursal</th>';
+  months.forEach(m=>html+=`<th class="num" style="font-size:.65rem">${MNS[m]}</th>`);
+  html+='<th class="num" style="font-size:.65rem;background:#f0fdf4">YTD</th></tr></thead><tbody>';
+  allS.forEach(s=>{
+    let ytdM=0,ytdC=0;
+    html+=`<tr><td style="font-size:.75rem;font-weight:600">${s}</td>`;
+    months.forEach(m=>{
+      const r=dm[s+'_'+m];if(r){ytdM+=r.meta||0;ytdC+=r.cons;}
+      html+=`<td class="num">${r?mBadge(r.pct):'—'}</td>`;
+    });
+    const ytdP=ytdM>0?ytdC/ytdM*100:null;
+    html+=`<td class="num" style="background:#f0fdf4">${mBadge(ytdP)}</td></tr>`;
+  });
+  // Total
+  html+='</tbody><tfoot><tr class="tfoot"><td><strong>TOT</strong></td>';
+  months.forEach(m=>{
+    let mm=0,mc=0;allS.forEach(s=>{const r=dm[s+'_'+m];if(r){mm+=r.meta||0;mc+=r.cons;}});
+    html+=`<td class="num">${mBadge(mm>0?mc/mm*100:null)}</td>`;
+  });
+  html+=`<td class="num" style="background:#f0fdf4">${mBadge(totP)}</td></tr></tfoot></table>`;
+  document.getElementById('mmetas-tbl').innerHTML=html;
 }
 }
 </script>
