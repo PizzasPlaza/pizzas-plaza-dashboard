@@ -350,7 +350,6 @@ footer{text-align:center;padding:16px;color:var(--muted2);font-size:.7rem;border
 
 <!-- METAS PAGE -->
 <div class="page-content" id="page-metas">
-  <!-- FILTERS -->
   <div class="filters" style="background:#fff;border-bottom:1px solid var(--border);padding:10px 24px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
     <div class="fg"><span class="fl">Mes</span>
       <div class="ms-wrap" id="mtwrap-month">
@@ -380,28 +379,18 @@ footer{text-align:center;padding:16px;color:var(--muted2);font-size:.7rem;border
   </div>
   <!-- CATEGORY TABS -->
   <div style="background:#fff;border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:0;overflow-x:auto">
-    <div id="mtab-ventas"       class="page-tab active" onclick="selectMetaCat('ventas')"       style="font-size:.75rem">💰 Ventas</div>
-    <div id="mtab-pizzas"       class="page-tab"        onclick="selectMetaCat('pizzas')"       style="font-size:.75rem">🍕 Pizzas</div>
-    <div id="mtab-queso_salon"  class="page-tab"        onclick="selectMetaCat('queso_salon')"  style="font-size:.75rem">🧀 Queso Salon</div>
-    <div id="mtab-queso_caja"   class="page-tab"        onclick="selectMetaCat('queso_caja')"   style="font-size:.75rem">📦 Queso Caja</div>
-    <div id="mtab-postres_salon" class="page-tab"       onclick="selectMetaCat('postres_salon')" style="font-size:.75rem">🍮 Postres</div>
-    <div id="mtab-bebidas"      class="page-tab"        onclick="selectMetaCat('bebidas')"      style="font-size:.75rem">🥤 Bebidas</div>
+    <div id="mtab-ventas"        class="page-tab active" onclick="selectMetaCat('ventas')"        style="font-size:.75rem">💰 Ventas</div>
+    <div id="mtab-pizzas"        class="page-tab"        onclick="selectMetaCat('pizzas')"        style="font-size:.75rem">🍕 Pizzas</div>
+    <div id="mtab-queso_salon"   class="page-tab"        onclick="selectMetaCat('queso_salon')"   style="font-size:.75rem">🧀 Queso Salon</div>
+    <div id="mtab-queso_caja"    class="page-tab"        onclick="selectMetaCat('queso_caja')"    style="font-size:.75rem">📦 Queso Caja</div>
+    <div id="mtab-postres_salon" class="page-tab"        onclick="selectMetaCat('postres_salon')" style="font-size:.75rem">🍮 Postres</div>
+    <div id="mtab-bebidas"       class="page-tab"        onclick="selectMetaCat('bebidas')"       style="font-size:.75rem">🥤 Bebidas</div>
   </div>
   <main style="padding:18px 24px;max-width:1600px;margin:0 auto">
     <div class="kpi-row" id="metas-kpi" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px"></div>
-    <div class="row2">
-      <div class="cc">
-        <div class="ct" id="metas-chart1-title">Meta vs Consuntivo <strong>por Mes</strong></div>
-        <div class="cw" style="height:280px;margin-top:12px"><canvas id="mch-monthly"></canvas></div>
-      </div>
-      <div class="cc">
-        <div class="ct">Logro por sucursal <strong>% Cumplimiento</strong></div>
-        <div class="cw" style="height:280px;margin-top:12px"><canvas id="mch-store"></canvas></div>
-      </div>
-    </div>
     <div class="cc rfull">
-      <div class="ct" id="metas-tbl-title">Detalle <strong>Meta vs Consuntivo por Sucursal y Mes</strong></div>
-      <div class="tbl-outer" id="metas-tbl"></div>
+      <div class="ct" id="metas-tbl-title">Detalle <strong>Meta vs Consuntivo — por Sucursal y Mes</strong></div>
+      <div class="tbl-outer" id="metas-tbl" style="margin-top:14px"></div>
     </div>
   </main>
 </div><!-- /page-metas -->
@@ -916,13 +905,13 @@ const MTSEL={month:new Set(),store:new Set()};
 const MTALL={month:[],store:[]};
 const MTPH={month:'Todos los meses',store:'Todas las sucursales'};
 const MTLB={month:v=>MN[parseInt(v)],store:v=>v};
-let MT_ACTIVE_CAT = 'ventas';
+let MT_ACTIVE_CAT='ventas';
 
 function mtBuildOpts(key,items){
   MTALL[key]=items;
   const c=document.getElementById('mtopts-'+key);
   c.innerHTML=items.map(v=>`<div class="ms-option"><input type="checkbox" id="mtchk-${key}-${String(v).replace(/ /g,'_')}" value="${v}" onchange="mtToggleOpt('${key}','${v}')"><label for="mtchk-${key}-${String(v).replace(/ /g,'_')}">${MTLB[key](String(v))}</label></div>`).join('');
-  MTSEL[key]=new Set(items.map(String)); mtUpdateBtn(key);
+  MTSEL[key]=new Set(items.map(String));mtUpdateBtn(key);
 }
 function mtToggleOpt(key,val){const s=String(val);if(MTSEL[key].has(s))MTSEL[key].delete(s);else MTSEL[key].add(s);const c=document.getElementById('mtchk-'+key+'-'+String(val).replace(/ /g,'_'));if(c)c.checked=MTSEL[key].has(s);mtUpdateBtn(key);updateMetas();}
 function mtSelectAll(key){MTSEL[key]=new Set(MTALL[key].map(String));MTALL[key].forEach(v=>{const c=document.getElementById('mtchk-'+key+'-'+String(v).replace(/ /g,'_'));if(c)c.checked=true;});mtUpdateBtn(key);updateMetas();}
@@ -945,7 +934,8 @@ function mtResetAll(){['month','store'].forEach(mtSelectAll);}
 function selectMetaCat(cat){
   MT_ACTIVE_CAT=cat;
   document.querySelectorAll('[id^="mtab-"]').forEach(t=>t.classList.remove('active'));
-  document.getElementById('mtab-'+cat).classList.add('active');
+  const tab=document.getElementById('mtab-'+cat);
+  if(tab) tab.classList.add('active');
   updateMetas();
 }
 
@@ -967,16 +957,19 @@ function filterMetas(cat){
 }
 
 function semaforo(pct){
-  if(pct===null||pct===undefined) return {color:'#9ca3af',bg:'#f3f4f6',icon:'—'};
-  if(pct>=100) return {color:'#16a34a',bg:'#dcfce7',icon:'🟢'};
-  if(pct>=80)  return {color:'#d97706',bg:'#fef9c3',icon:'🟡'};
-  return              {color:'#dc2626',bg:'#fee2e2',icon:'🔴'};
+  if(pct===null||pct===undefined) return {color:'#9ca3af',bg:'#f3f4f6'};
+  if(pct>=100) return {color:'#16a34a',bg:'#dcfce7'};
+  if(pct>=80)  return {color:'#d97706',bg:'#fef9c3'};
+  return              {color:'#dc2626',bg:'#fee2e2'};
 }
-
-function fmtVal(cat, v){
-  if(v===null||v===undefined||v===0) return '—';
+function fmtMeta(cat,v){
+  if(!v&&v!==0) return '—';
   if(cat==='ventas') return fMoney(v);
   return fNum(v);
+}
+function pctBadge(pct){
+  const s=semaforo(pct);
+  return pct!==null?`<span style="background:${s.bg};color:${s.color};padding:2px 7px;border-radius:5px;font-weight:700;font-size:.75rem;white-space:nowrap">${pct.toFixed(1)}%</span>`:'<span style="color:#9ca3af">—</span>';
 }
 
 function updateMetas(){
@@ -984,24 +977,25 @@ function updateMetas(){
     document.getElementById('metas-kpi').innerHTML='<div style="grid-column:1/-1;color:var(--muted2);padding:20px;text-align:center">Sin datos — verifica hojas metas y Foglio4</div>';
     return;
   }
-  const cat = MT_ACTIVE_CAT;
-  const data = filterMetas(cat);
-  const catLabel = (RAW.metas_cats||{})[cat] || cat;
+  const cat=MT_ACTIVE_CAT;
+  const data=filterMetas(cat);
+  const catLabel=(RAW.metas_cats||{})[cat]||cat;
 
-  const totMeta = data.reduce((s,r)=>s+(r.meta||0),0);
-  const totCons = data.reduce((s,r)=>s+r.cons,0);
-  const totPct  = totMeta>0?totCons/totMeta*100:null;
-  const withPct = data.filter(r=>r.pct!==null);
-  const green   = withPct.filter(r=>r.pct>=100).length;
-  const yellow  = withPct.filter(r=>r.pct>=80&&r.pct<100).length;
-  const red     = withPct.filter(r=>r.pct<80).length;
-  const sem = semaforo(totPct);
+  const totMeta=data.reduce((s,r)=>s+(r.meta||0),0);
+  const totCons=data.reduce((s,r)=>s+r.cons,0);
+  const totPct=totMeta>0?totCons/totMeta*100:null;
+  const withPct=data.filter(r=>r.pct!==null);
+  const green=withPct.filter(r=>r.pct>=100).length;
+  const yellow=withPct.filter(r=>r.pct>=80&&r.pct<100).length;
+  const red=withPct.filter(r=>r.pct<80).length;
+  const sem=semaforo(totPct);
 
+  // KPIs
   document.getElementById('metas-kpi').innerHTML=[
-    {icon:'🎯',label:'Meta YTD',      val:fmtVal(cat,totMeta), c:'c0'},
-    {icon:'📊',label:'Consuntivo YTD',val:fmtVal(cat,totCons), c:'c1'},
-    {icon:'📈',label:'% Logro',        val:totPct?totPct.toFixed(1)+'%':'—', col:sem.color, c:'c2'},
-    {icon:'🏪',label:'Sucursales',     val:`🟢${green} 🟡${yellow} 🔴${red}`, c:'c3'},
+    {icon:'🎯',label:'Meta YTD',        val:fmtMeta(cat,totMeta), c:'c0'},
+    {icon:'💰',label:'Consuntivo YTD',  val:fmtMeta(cat,totCons), c:'c1'},
+    {icon:'📈',label:'% Logro',          val:totPct?totPct.toFixed(1)+'%':'—', col:sem.color, c:'c2'},
+    {icon:'🏪',label:'Sucursales',       val:`🟢${green} 🟡${yellow} 🔴${red}`, c:'c3'},
   ].map(k=>`<div class="kpi ${k.c}">
     <div class="kpi-icon">${k.icon}</div>
     <div class="kpi-label">${k.label} — ${catLabel}</div>
@@ -1009,109 +1003,66 @@ function updateMetas(){
     <div class="kpi-delta neu"></div>
   </div>`).join('');
 
-  // Months available
+  // Months + stores
   const months=[...new Set(data.map(r=>r.month))].sort((a,b)=>a-b);
-
-  // Aggregate by month (sum across filtered stores)
-  const byMonth={};
-  data.forEach(r=>{
-    if(!byMonth[r.month]) byMonth[r.month]={meta:0,cons:0};
-    byMonth[r.month].meta+=r.meta||0;
-    byMonth[r.month].cons+=r.cons;
-  });
-
-  // Chart 1: Meta vs Consuntivo by month
-  if(charts['mch-monthly']) charts['mch-monthly'].destroy();
-  const el1=document.getElementById('mch-monthly');
-  if(el1){
-    const mPcts=months.map(m=>byMonth[m].meta>0?byMonth[m].cons/byMonth[m].meta*100:null);
-    const barColors=mPcts.map(p=>p===null?'#e5e7eb':p>=100?'rgba(22,163,74,0.8)':p>=80?'rgba(217,119,6,0.8)':'rgba(220,38,38,0.8)');
-    charts['mch-monthly']=new Chart(el1.getContext('2d'),{type:'bar',
-      data:{labels:months.map(m=>MN[m]),datasets:[
-        {label:'Meta',data:months.map(m=>byMonth[m].meta),backgroundColor:'rgba(148,163,184,0.3)',borderColor:'#94a3b8',borderWidth:2,borderRadius:4,borderSkipped:false,order:2},
-        {label:'Consuntivo',data:months.map(m=>byMonth[m].cons),backgroundColor:barColors,borderRadius:4,borderSkipped:false,order:1},
-      ]},
-      options:{...BASE,plugins:{...BASE.plugins,datalabels:{display:false},
-        legend:{display:true,labels:{color:'#6b7280',font:{family:'Inter',size:11},boxWidth:12,padding:12}},
-        tooltip:{...BASE.plugins.tooltip,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmtVal(cat,ctx.raw)}`}}},
-        scales:{x:{grid:{color:'#f0f2f5'},ticks:{color:'#9ca3af',font:{family:'Inter',size:11}}},
-          y:{grid:{color:'#f0f2f5'},ticks:{color:'#9ca3af',font:{family:'Inter',size:10},callback:v=>cat==='ventas'?fMoneyK(v):fNum(v)}}}}});
-  }
-
-  // Chart 2: Store achievement %
-  const byStore={};
-  data.forEach(r=>{
-    if(!byStore[r.store]) byStore[r.store]={meta:0,cons:0};
-    byStore[r.store].meta+=r.meta||0;
-    byStore[r.store].cons+=r.cons;
-  });
-  const stores=Object.keys(byStore).sort((a,b)=>{
-    const pa=byStore[a].meta>0?byStore[a].cons/byStore[a].meta:0;
-    const pb=byStore[b].meta>0?byStore[b].cons/byStore[b].meta:0;
-    return pb-pa;
-  });
-  const sPcts=stores.map(s=>byStore[s].meta>0?+(byStore[s].cons/byStore[s].meta*100).toFixed(1):null);
-  const sColors=sPcts.map(p=>p===null?'#e5e7eb':p>=100?'rgba(22,163,74,0.8)':p>=80?'rgba(217,119,6,0.8)':'rgba(220,38,38,0.8)');
-
-  if(charts['mch-store']) charts['mch-store'].destroy();
-  const el2=document.getElementById('mch-store');
-  if(el2) charts['mch-store']=new Chart(el2.getContext('2d'),{type:'bar',
-    data:{labels:stores,datasets:[{label:'% Logro',data:sPcts,backgroundColor:sColors,borderRadius:4,borderSkipped:false}]},
-    options:{...BASE,indexAxis:'y',plugins:{...BASE.plugins,datalabels:{display:false},
-      tooltip:{...BASE.plugins.tooltip,callbacks:{label:ctx=>` ${ctx.raw}%`}}},
-      scales:{x:{grid:{color:'#f0f2f5'},min:0,ticks:{color:'#9ca3af',font:{family:'Inter',size:10},callback:v=>v+'%'}},
-        y:{grid:{color:'#f0f2f5'},ticks:{color:'#555',font:{family:'Inter',size:10}}}}}});
-
-  // Table: stores × months
   const allStores=[...new Set(data.map(r=>r.store))].sort();
   const dataMap={};
   data.forEach(r=>{dataMap[r.store+'_'+r.month]=r;});
 
-  let html='<table><thead><tr><th>Sucursal</th>';
-  months.forEach(m=>html+=`<th class="num" colspan="3" style="text-align:center;background:#f8f9fb">${MNS[m]}</th>`);
-  html+='<th class="num" colspan="3" style="text-align:center;background:#f0fdf4">YTD</th></tr>';
-  html+='<tr><th></th>';
-  months.forEach(()=>html+='<th class="num" style="font-size:.6rem;color:var(--muted)">Meta</th><th class="num" style="font-size:.6rem;color:var(--muted)">Real</th><th class="num" style="font-size:.6rem;color:var(--muted)">%</th>');
-  html+='<th class="num" style="font-size:.6rem;color:var(--muted)">Meta</th><th class="num" style="font-size:.6rem;color:var(--muted)">Real</th><th class="num" style="font-size:.6rem;color:var(--muted)">%</th>';
+  // Table header
+  let html='<table><thead>';
+  // Row 1: month groups
+  html+='<tr><th rowspan="2" style="vertical-align:middle">Sucursal</th>';
+  months.forEach(m=>html+=`<th colspan="3" class="num" style="text-align:center;background:#f8f9fb;border-bottom:1px solid var(--border)">${MN[m]}</th>`);
+  html+='<th colspan="3" class="num" style="text-align:center;background:#f0fdf4;border-bottom:1px solid var(--border)">YTD</th></tr>';
+  // Row 2: sub-headers
+  html+='<tr>';
+  const subHeaders=months.length*3+3;
+  for(let i=0;i<subHeaders;i++){
+    const labels=['Meta','Real','%'];
+    html+=`<th class="num" style="font-size:.6rem;color:var(--muted);font-weight:600;padding:4px 8px">${labels[i%3]}</th>`;
+  }
   html+='</tr></thead><tbody>';
 
+  // Data rows
   allStores.forEach(s=>{
     let ytdM=0,ytdC=0;
-    html+=`<tr><td><strong>${s}</strong></td>`;
+    html+=`<tr><td style="font-weight:600">${s}</td>`;
     months.forEach(m=>{
       const rec=dataMap[s+'_'+m];
       if(rec){
         ytdM+=rec.meta||0; ytdC+=rec.cons;
-        const sem=semaforo(rec.pct);
-        const pCell=rec.pct!==null?`<span style="background:${sem.bg};color:${sem.color};padding:2px 6px;border-radius:4px;font-weight:700;font-size:.72rem">${rec.pct}%</span>`:'<span style="color:#9ca3af">—</span>';
-        html+=`<td class="num" style="color:var(--muted)">${rec.meta?fmtVal(cat,rec.meta):'—'}</td><td class="num col26">${rec.cons>0?fmtVal(cat,rec.cons):'—'}</td><td class="num">${pCell}</td>`;
+        html+=`<td class="num" style="color:var(--muted);font-size:.8rem">${rec.meta?fmtMeta(cat,rec.meta):'—'}</td>`;
+        html+=`<td class="num col26" style="font-size:.8rem">${rec.cons>0?fmtMeta(cat,rec.cons):'—'}</td>`;
+        html+=`<td class="num">${pctBadge(rec.pct)}</td>`;
       } else {
         html+='<td class="num">—</td><td class="num">—</td><td class="num">—</td>';
       }
     });
     const ytdPct=ytdM>0?ytdC/ytdM*100:null;
-    const ytdSem=semaforo(ytdPct);
-    const ytdCell=ytdPct!==null?`<span style="background:${ytdSem.bg};color:${ytdSem.color};padding:2px 6px;border-radius:4px;font-weight:700;font-size:.72rem">${ytdPct.toFixed(1)}%</span>`:'—';
-    html+=`<td class="num-h" style="color:var(--muted)">${ytdM>0?fmtVal(cat,ytdM):'—'}</td><td class="num-h col26">${ytdC>0?fmtVal(cat,ytdC):'—'}</td><td class="num-h">${ytdCell}</td></tr>`;
+    html+=`<td class="num-h" style="color:var(--muted)">${ytdM>0?fmtMeta(cat,ytdM):'—'}</td>`;
+    html+=`<td class="num-h col26">${ytdC>0?fmtMeta(cat,ytdC):'—'}</td>`;
+    html+=`<td class="num-h">${pctBadge(ytdPct)}</td></tr>`;
   });
 
   // Total row
-  html+=`</tbody><tfoot><tr class="tfoot"><td><strong>TOTAL</strong></td>`;
+  html+='</tbody><tfoot><tr class="tfoot"><td><strong>TOTAL</strong></td>';
   months.forEach(m=>{
     let mm=0,mc=0;
     allStores.forEach(s=>{const r=dataMap[s+'_'+m];if(r){mm+=r.meta||0;mc+=r.cons;}});
-    const mp=mm>0?mc/mm*100:null; const ms=semaforo(mp);
-    const cell=mp!==null?`<span style="background:${ms.bg};color:${ms.color};padding:2px 6px;border-radius:4px;font-weight:700;font-size:.72rem">${mp.toFixed(1)}%</span>`:'—';
-    html+=`<td class="num-h" style="color:var(--muted)">${mm>0?fmtVal(cat,mm):'—'}</td><td class="num-h col26">${mc>0?fmtVal(cat,mc):'—'}</td><td class="num-h">${cell}</td>`;
+    const mp=mm>0?mc/mm*100:null;
+    html+=`<td class="num-h" style="color:var(--muted)">${mm>0?fmtMeta(cat,mm):'—'}</td>`;
+    html+=`<td class="num-h col26">${mc>0?fmtMeta(cat,mc):'—'}</td>`;
+    html+=`<td class="num-h">${pctBadge(mp)}</td>`;
   });
-  const totCell=totPct!==null?`<span style="background:${sem.bg};color:${sem.color};padding:2px 6px;border-radius:4px;font-weight:700;font-size:.72rem">${totPct.toFixed(1)}%</span>`:'—';
-  html+=`<td class="num-h" style="color:var(--muted)">${totMeta>0?fmtVal(cat,totMeta):'—'}</td><td class="num-h col26">${totCons>0?fmtVal(cat,totCons):'—'}</td><td class="num-h">${totCell}</td></tr></tfoot></table>`;
+  const totCell=pctBadge(totPct);
+  html+=`<td class="num-h" style="color:var(--muted)">${totMeta>0?fmtMeta(cat,totMeta):'—'}</td>`;
+  html+=`<td class="num-h col26">${totCons>0?fmtMeta(cat,totCons):'—'}</td>`;
+  html+=`<td class="num-h">${totCell}</td></tr></tfoot></table>`;
   document.getElementById('metas-tbl').innerHTML=html;
-
-  setTimeout(()=>['mch-monthly','mch-store'].forEach(id=>{if(charts[id])charts[id].resize();}),100);
 }
 
-// ── GIROPIZZA ──────────────────────────────────────────────────────────────// ── GIROPIZZA ──────────────────────────────────────────────────────────────
+// ── GIROPIZZA ──────────────────────────────────────────────────────────────// ── GIROPIZZA ──────────────────────────────────────────────────────────────// ── GIROPIZZA ──────────────────────────────────────────────────────────────
 const GIRO_LINE_COLORS = ['#0ea5e9','#f97316','#10b981','#8b5cf6','#f59e0b','#ec4899','#14b8a6','#6366f1','#ef4444','#84cc16'];
 const GIRO_STORES = [...new Set((RAW.giro||[]).map(r=>r.store))].sort();
 
