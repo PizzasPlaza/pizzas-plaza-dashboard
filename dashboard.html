@@ -922,7 +922,7 @@ function switchPage(page){
   document.querySelector('.page-tab[onclick*="'+page+'"]').classList.add('active');
   document.getElementById('page-'+page).classList.add('active');
   if(page==='giropizza') setTimeout(updateGiro, 150);
-  if(page==='metas') setTimeout(updateMetas, 150);
+  if(page==='metas') setTimeout(updateMetas, 200);
 }
 
 // ── METAS ─────────────────────────────────────────────────────────────────
@@ -1106,19 +1106,24 @@ function updateMetas(){
     });
     const allProds=[...new Set([...Object.keys(prod25),...Object.keys(prod26)])]
       .sort((a,b)=>((prod26[b]||0)+(prod25[b]||0))-((prod26[a]||0)+(prod25[a]||0)));
-    if(charts['mch-breakdown']) charts['mch-breakdown'].destroy();
-    const elB=document.getElementById('mch-breakdown');
-    if(elB) charts['mch-breakdown']=new Chart(elB.getContext('2d'),{type:'bar',
-      data:{labels:allProds,datasets:[
-        {label:'2025',data:allProds.map(p=>+(prod25[p]||0).toFixed(1)),backgroundColor:'rgba(14,165,233,0.75)',borderRadius:4,borderSkipped:false},
-        {label:'2026',data:allProds.map(p=>+(prod26[p]||0).toFixed(1)),backgroundColor:'rgba(249,115,22,0.85)',borderRadius:4,borderSkipped:false},
-      ]},
-      options:{...BASE,plugins:{...BASE.plugins,datalabels:{display:false},
-        legend:{display:true,labels:{color:'#6b7280',font:{family:'Inter',size:11},boxWidth:12,padding:12}},
-        tooltip:{...BASE.plugins.tooltip,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fNum(ctx.raw)}`}}},
-        scales:{x:{grid:{color:'#f0f2f5'},ticks:{color:'#555',font:{family:'Inter',size:10},maxRotation:30}},
-          y:{grid:{color:'#f0f2f5'},ticks:{color:'#9ca3af',font:{family:'Inter',size:10},callback:v=>fNum(v)}}}}});
-    setTimeout(()=>{if(charts['mch-breakdown'])charts['mch-breakdown'].resize();},150);
+    // Render chart after browser paints the newly visible div
+    setTimeout(()=>{
+      try{
+        if(charts['mch-breakdown']) charts['mch-breakdown'].destroy();
+        const elB=document.getElementById('mch-breakdown');
+        if(elB) charts['mch-breakdown']=new Chart(elB.getContext('2d'),{type:'bar',
+          data:{labels:allProds,datasets:[
+            {label:'2025',data:allProds.map(p=>+(prod25[p]||0).toFixed(1)),backgroundColor:'rgba(14,165,233,0.75)',borderRadius:4,borderSkipped:false},
+            {label:'2026',data:allProds.map(p=>+(prod26[p]||0).toFixed(1)),backgroundColor:'rgba(249,115,22,0.85)',borderRadius:4,borderSkipped:false},
+          ]},
+          options:{...BASE,plugins:{...BASE.plugins,datalabels:{display:false},
+            legend:{display:true,labels:{color:'#6b7280',font:{family:'Inter',size:11},boxWidth:12,padding:12}},
+            tooltip:{...BASE.plugins.tooltip,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fNum(ctx.raw)}`}}},
+            scales:{x:{grid:{color:'#f0f2f5'},ticks:{color:'#555',font:{family:'Inter',size:10},maxRotation:30}},
+              y:{grid:{color:'#f0f2f5'},ticks:{color:'#9ca3af',font:{family:'Inter',size:10},callback:v=>fNum(v)}}}}});
+        setTimeout(()=>{if(charts['mch-breakdown'])charts['mch-breakdown'].resize();},100);
+      } catch(e){ console.error('Breakdown chart error:',e); }
+    },250);
   } else {
     bdownSection.style.display='none';
     if(charts['mch-breakdown']){charts['mch-breakdown'].destroy();delete charts['mch-breakdown'];}
