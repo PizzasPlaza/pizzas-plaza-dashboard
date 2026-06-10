@@ -676,33 +676,39 @@ function exportToExcel(tableId, filename){
       return STYLES.def;
     }
 
-    // Build data and styles — handle rowspan and colspan
+    // Build data and styles — handle rowspan and colspan + Excel merges
     const rows = Array.from(table.querySelectorAll('tr'));
     const nRows = rows.length;
-    // Estimate max cols
     const maxCols = Math.max(...rows.map(tr=>
       Array.from(tr.querySelectorAll('th,td')).reduce((s,c)=>s+parseInt(c.getAttribute('colspan')||1),0)
     ));
-    const wsData = Array.from({length:nRows},()=>Array(maxCols).fill(''));
-    const wsStylesGrid = Array.from({length:nRows},()=>Array(maxCols).fill(null));
-    const occupied = Array.from({length:nRows},()=>new Uint8Array(maxCols));
+    const wsData        = Array.from({length:nRows},()=>Array(maxCols).fill(''));
+    const wsStylesGrid  = Array.from({length:nRows},()=>Array(maxCols).fill(null));
+    const occupied      = Array.from({length:nRows},()=>new Uint8Array(maxCols));
+    const merges        = [];
 
     rows.forEach((tr,ri)=>{
       const inHead = !!tr.closest('thead');
       const inFoot = !!tr.closest('tfoot');
       let ci = 0;
       tr.querySelectorAll('th,td').forEach(cell=>{
-        // Skip cells occupied by previous rowspans
         while(occupied[ri][ci]) ci++;
         const val   = cell.textContent.trim();
         const style = getCellStyle(cell, inHead, inFoot);
         const rs    = parseInt(cell.getAttribute('rowspan')||1);
         const cs    = parseInt(cell.getAttribute('colspan')||1);
+        // Register Excel merge for multi-span cells
+        if(rs>1||cs>1){
+          merges.push({
+            s:{r:ri, c:ci},
+            e:{r:Math.min(ri+rs-1,nRows-1), c:Math.min(ci+cs-1,maxCols-1)}
+          });
+        }
         for(let r=ri; r<Math.min(ri+rs,nRows); r++){
           for(let c=ci; c<Math.min(ci+cs,maxCols); c++){
             occupied[r][c]=1;
             wsData[r][c]       = (r===ri&&c===ci)?val:'';
-            wsStylesGrid[r][c] = (r===ri&&c===ci)?style:(STYLES.def);
+            wsStylesGrid[r][c] = style;
           }
         }
         ci+=cs;
@@ -723,7 +729,8 @@ function exportToExcel(tableId, filename){
       });
     });
 
-    ws['!cols'] = colWidths.map(w=>({wch:w}));
+    ws['!cols']   = colWidths.map(w=>({wch:w}));
+    ws['!merges'] = merges;
     ws['!freeze'] = {xSplit:0,ySplit:1};
 
     const wb = XLSX.utils.book_new();
