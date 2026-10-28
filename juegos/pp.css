@@ -1,0 +1,44 @@
+/* ===== Pizzas Plaza · estilos comunes del cupón ===== */
+.ppCapa{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;padding:18px;z-index:50;overflow-y:auto;background:var(--ppFondo,#FFF8E7);color:var(--ppTexto,#422913);font-family:Nunito,system-ui,sans-serif}
+.ppCapa.on{display:flex}
+.ppImg{height:110px;animation:ppFlota 2.4s ease-in-out infinite}
+@keyframes ppFlota{50%{transform:translateY(-8px) rotate(-3deg)}}
+.ppTit{font-family:var(--ppFuente,'Bebas Neue'),Impact,sans-serif;font-weight:400;font-size:42px;line-height:1;margin:0;color:var(--ppAcento,#C8102E)}
+.ppMsg{margin:0;font-weight:800;font-size:15px;max-width:340px}
+.ppCup{width:100%;max-width:360px;background:#fff;color:#422913;border:3px dashed var(--ppAcento,#C8102E);border-radius:18px;padding:14px}
+.ppCup.anim{animation:ppBorde 1.2s linear infinite}
+@keyframes ppBorde{50%{border-color:#16A34A}}
+.ppPct{font-family:'Bebas Neue',Impact,sans-serif;font-size:86px;line-height:.9;color:var(--ppAcento,#C8102E)}
+.ppQue{font-weight:900;font-size:17px}
+.ppCod{font-weight:900;font-size:32px;letter-spacing:3px;background:#FCC10C;border-radius:10px;padding:6px 8px;margin:10px 0 6px}
+.ppVig{font-weight:800;font-size:14px}
+.ppVivo{font-weight:900;font-size:15px;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px}
+.ppVivo i{width:10px;height:10px;border-radius:50%;background:#16A34A;animation:ppLat 1s infinite}
+@keyframes ppLat{50%{opacity:.2;transform:scale(.6)}}
+.ppCanjeado{font-weight:900;font-size:30px;color:#fff;background:#B91C1C;border-radius:12px;padding:8px;transform:rotate(-4deg);margin:8px 0}
+.ppBtn{font-family:Nunito,sans-serif;font-weight:900;font-size:22px;border:0;border-radius:16px;padding:12px 30px;background:var(--ppAcento,#C8102E);color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.25);cursor:pointer}
+.ppBtn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.ppVerde{background:#16A34A}
+.ppSec{background:#FCC10C;color:#422913;font-size:16px;padding:8px 20px}
+.ppLegal{font-size:12px;opacity:.7;font-weight:700;max-width:340px;margin:0}
+.ppLogoBox{background:#FFF8E7;border-radius:12px;padding:6px 10px}
+.ppLogoBox img{width:60vw;max-width:240px;display:block}
+#ppInX{font-weight:900;font-size:28px;letter-spacing:3px;text-align:center;width:100%;max-width:340px;border:3px solid var(--ppAcento,#C8102E);border-radius:12px;padding:8px;text-transform:uppercase}
+#ppRes{font-weight:900;font-size:19px;min-height:52px;max-width:340px}
+#ppModal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:60;font-family:Nunito,sans-serif}
+#ppModal.on{display:flex}
+#ppModal .ppCaja{background:#fff;color:#333;border-radius:16px;padding:18px;width:88%;max-width:330px;text-align:center}
+#ppModal input{font-size:30px;font-weight:900;letter-spacing:8px;text-align:center;width:100%;border:3px solid #999;border-radius:10px;padding:6px;margin:10px 0}
+#ppModal button{font-family:Nunito,sans-serif;font-weight:900;font-size:18px;border:0;border-radius:10px;padding:10px 16px;margin:4px}
+/* registro */
+.ppForm{width:100%;max-width:360px;display:flex;flex-direction:column;gap:10px;text-align:left}
+.ppForm label{font-weight:900;font-size:14px;display:flex;flex-direction:column;gap:4px}
+.ppForm input[type=tel],.ppForm input:not([type]){font-family:Nunito,sans-serif;font-weight:800;font-size:20px;border:3px solid var(--ppAcento,#C8102E);border-radius:12px;padding:8px 12px;background:#fff;color:#422913}
+.ppForm .ppCheck{flex-direction:row;align-items:flex-start;gap:8px;font-size:13px;font-weight:800}
+.ppForm .ppCheck input{width:22px;height:22px;flex:none;margin:0;accent-color:var(--ppAcento,#C8102E)}
+.ppForm .ppCheck a{color:var(--ppAcento,#C8102E)}
+.ppForm .ppBtn{margin-top:4px}
+.ppErr{color:#B91C1C;font-weight:900;font-size:14px;min-height:18px}
+.ppLink{color:inherit;font-weight:900;font-size:14px;opacity:.75}
+#ppReg{z-index:55}
+.ppBtn:disabled{opacity:.6}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Pizzas Plaza · Caja · Validar cupón</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:#FFF8E7;font-family:Nunito,system-ui,sans-serif;color:#422913;display:flex;flex-direction:column;align-items:center;padding:18px;gap:12px}
+.logo{width:220px;background:#fff;border-radius:12px;padding:6px 10px}
+h1{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;font-size:44px;margin:0;color:#C8102E}
+.box{width:100%;max-width:400px;background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 0 rgba(66,41,19,.12);display:flex;flex-direction:column;gap:10px}
+label{font-weight:900;font-size:14px;display:flex;flex-direction:column;gap:4px}
+input{font-family:Nunito,sans-serif;font-weight:900;font-size:24px;border:3px solid #422913;border-radius:12px;padding:8px 12px;text-align:center;letter-spacing:2px}
+#cod{text-transform:uppercase;font-size:28px}
+button{font-family:Nunito,sans-serif;font-weight:900;font-size:20px;border:0;border-radius:14px;padding:12px;color:#fff;background:#C8102E;box-shadow:0 4px 0 rgba(0,0,0,.2);cursor:pointer}
+button.verde{background:#16A34A}
+button:disabled{opacity:.5}
+#res{display:none}
+.estado{font-family:'Bebas Neue',Impact,sans-serif;font-size:40px;text-align:center;border-radius:12px;color:#fff;padding:4px}
+.ACTIVO{background:#16A34A}.CANJEADO{background:#B91C1C}.VENCIDO{background:#92400E}.NOEXISTE{background:#555}
+.datos{font-weight:800;font-size:15px;line-height:1.6}
+.msg{font-weight:900;text-align:center;min-height:22px}
+small{opacity:.7;font-weight:700;text-align:center}
+</style>
+</head>
+<body>
+<img class="logo" src="img/logo.png" alt="Pizzas Plaza">
+<h1>Caja · Cupones</h1>
+<div class="box">
+  <label>Sucursal<input id="suc" placeholder="Ej. Coyoacán" style="font-size:18px;letter-spacing:0"></label>
+  <label>Código del cupón<input id="cod" placeholder="PP-XXX-XXXX" maxlength="11" autocomplete="off"></label>
+  <button id="bVal">VALIDAR</button>
+  <div class="msg" id="msg"></div>
+</div>
+<div class="box" id="res">
+  <div class="estado" id="estado"></div>
+  <div class="datos" id="datos"></div>
+  <div id="zonaCanje">
+    <label>PIN de caja<input id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></label>
+    <button class="verde" id="bCanjear" style="width:100%;margin-top:8px">APLICAR DESCUENTO Y CANJEAR</button>
+  </div>
+  <div class="msg" id="msg2"></div>
+</div>
+<small>Cada cupón se puede canjear una sola vez en cualquier sucursal. Registra el código también en el ticket del POS.</small>
+<script src="config.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const st={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+$('suc').value=st.get('pp_caja_suc')||st.get('pp_suc')||''; $('suc').onchange=()=>st.set('pp_caja_suc',$('suc').value.trim());
+async function api(p){ const r=await fetch(PP_API+'?'+new URLSearchParams(p),{redirect:'follow'}); return r.json(); }
+$('cod').addEventListener('input',e=>{ let v=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''); if(v.startsWith('PP')) v=v.slice(2); v=v.slice(0,7); e.target.value=v?'PP-'+v.slice(0,3)+(v.length>3?'-'+v.slice(3):''):''; });
+let codigo='';
+$('bVal').onclick=async()=>{
+  codigo=$('cod').value.trim().toUpperCase(); if(codigo.length<11){ $('msg').textContent='Escribe el código completo.'; return; }
+  $('msg').textContent='Consultando…'; $('bVal').disabled=true; $('res').style.display='none';
+  try{ const r=await api({accion:'validar',codigo}); $('msg').textContent='';
+    $('res').style.display='flex'; $('msg2').textContent='';
+    if(!r.existe){ $('estado').className='estado NOEXISTE'; $('estado').textContent='NO EXISTE'; $('datos').textContent='Este código no está en el sistema. No aplicar descuento.'; $('zonaCanje').style.display='none'; }
+    else { $('estado').className='estado '+r.estado; $('estado').textContent=r.estado==='ACTIVO'?'✓ VÁLIDO':r.estado;
+      $('datos').innerHTML=`Cliente: <b>${r.nombre||'—'}</b> (${r.tel})<br>Juego: ${r.juego}<br>Emitido: ${r.emitido}<br>Vence: ${r.vence}`+(r.canjeado?`<br><b>Canjeado: ${r.canjeado}${r.sucCanje?' en '+r.sucCanje:''}</b>`:'')+`<br>Descuento: <b>${r.descuento}%</b>`;
+      $('zonaCanje').style.display=r.estado==='ACTIVO'?'':'none'; }
+  }catch(e){ $('msg').textContent='Sin conexión. Intenta otra vez.'; }
+  $('bVal').disabled=false;
+};
+$('bCanjear').onclick=async()=>{
+  if(!$('suc').value.trim()){ $('msg2').textContent='Escribe la sucursal arriba.'; return; }
+  $('bCanjear').disabled=true; $('msg2').textContent='Canjeando…';
+  try{ const r=await api({accion:'canjear',codigo,pin:$('pin').value,suc:$('suc').value.trim()});
+    if(r.ok){ $('estado').className='estado CANJEADO'; $('estado').textContent='CANJEADO ✓'; $('zonaCanje').style.display='none'; $('msg2').textContent=`Listo: aplica el ${r.descuento}% de descuento. Canjeado el ${r.canjeado}.`; }
+    else $('msg2').textContent=r.error;
+  }catch(e){ $('msg2').textContent='Sin conexión. Intenta otra vez.'; }
+  $('bCanjear').disabled=false;
+};
+</script>
+</body>
+</html>
