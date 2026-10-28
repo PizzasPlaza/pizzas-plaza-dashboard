@@ -75,7 +75,7 @@ const PP = (()=>{
 </section>
 <div id="ppModal"><div class="ppCaja">
   <div style="font-weight:900;font-size:19px">Solo para el cajero</div>
-  <div style="font-size:14px;margin-top:4px">Escribe el PIN para aplicar el descuento. El cupón quedará marcado como CANJEADO en el sistema.</div>
+  <div style="font-size:14px;margin-top:4px">Escribe el PIN de tu sucursal para aplicar el descuento. El cupón quedará marcado como CANJEADO en el sistema.</div>
   <input id="ppPin" type="password" inputmode="numeric" maxlength="6" autocomplete="off">
   <div id="ppPinErr" class="ppErr"></div>
   <button id="ppPinOk" style="background:#16A34A;color:#fff">CANJEAR</button><button id="ppPinNo" style="background:#ddd">Cancelar</button>
@@ -115,7 +115,7 @@ const PP = (()=>{
       $('ppPinNo').onclick=()=>$('ppModal').classList.remove('on');
       $('ppPinOk').onclick=async()=>{ $('ppPinOk').disabled=true; $('ppPinErr').textContent='Verificando…';
         try{ const r=await api({accion:'canjear',codigo:actual.codigo,pin:$('ppPin').value,suc:sucursal()});
-          if(!r.ok){ $('ppPinErr').textContent=r.error; } else { actual.estado='CANJEADO'; actual.canjeado=r.canjeado; $('ppModal').classList.remove('on'); pintar(actual); }
+          if(!r.ok){ $('ppPinErr').textContent=r.error; } else { actual.estado='CANJEADO'; actual.canjeado=r.canjeado+(r.sucursal?' · '+r.sucursal:''); $('ppModal').classList.remove('on'); pintar(actual); }
         }catch(e){ $('ppPinErr').textContent='Sin conexión. Intenta otra vez.'; }
         $('ppPinOk').disabled=false; };
       $('ppReintentar').onclick=ganar;

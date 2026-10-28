@@ -30,7 +30,6 @@ small{opacity:.7;font-weight:700;text-align:center}
 <img class="logo" src="img/logo.png" alt="Pizzas Plaza">
 <h1>Caja · Cupones</h1>
 <div class="box">
-  <label>Sucursal<input id="suc" placeholder="Ej. Coyoacán" style="font-size:18px;letter-spacing:0"></label>
   <label>Código del cupón<input id="cod" placeholder="PP-XXX-XXXX" maxlength="11" autocomplete="off"></label>
   <button id="bVal">VALIDAR</button>
   <div class="msg" id="msg"></div>
@@ -39,7 +38,7 @@ small{opacity:.7;font-weight:700;text-align:center}
   <div class="estado" id="estado"></div>
   <div class="datos" id="datos"></div>
   <div id="zonaCanje">
-    <label>PIN de caja<input id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></label>
+    <label>PIN de tu sucursal<input id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></label>
     <button class="verde" id="bCanjear" style="width:100%;margin-top:8px">APLICAR DESCUENTO Y CANJEAR</button>
   </div>
   <div class="msg" id="msg2"></div>
@@ -49,7 +48,6 @@ small{opacity:.7;font-weight:700;text-align:center}
 <script>
 const $=id=>document.getElementById(id);
 const st={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
-$('suc').value=st.get('pp_caja_suc')||st.get('pp_suc')||''; $('suc').onchange=()=>st.set('pp_caja_suc',$('suc').value.trim());
 async function api(p){ const r=await fetch(PP_API+'?'+new URLSearchParams(p),{redirect:'follow'}); return r.json(); }
 $('cod').addEventListener('input',e=>{ let v=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''); if(v.startsWith('PP')) v=v.slice(2); v=v.slice(0,7); e.target.value=v?'PP-'+v.slice(0,3)+(v.length>3?'-'+v.slice(3):''):''; });
 let codigo='';
@@ -66,10 +64,9 @@ $('bVal').onclick=async()=>{
   $('bVal').disabled=false;
 };
 $('bCanjear').onclick=async()=>{
-  if(!$('suc').value.trim()){ $('msg2').textContent='Escribe la sucursal arriba.'; return; }
   $('bCanjear').disabled=true; $('msg2').textContent='Canjeando…';
-  try{ const r=await api({accion:'canjear',codigo,pin:$('pin').value,suc:$('suc').value.trim()});
-    if(r.ok){ $('estado').className='estado CANJEADO'; $('estado').textContent='CANJEADO ✓'; $('zonaCanje').style.display='none'; $('msg2').textContent=`Listo: aplica el ${r.descuento}% de descuento. Canjeado el ${r.canjeado}.`; }
+  try{ const r=await api({accion:'canjear',codigo,pin:$('pin').value});
+    if(r.ok){ $('estado').className='estado CANJEADO'; $('estado').textContent='CANJEADO ✓'; $('zonaCanje').style.display='none'; $('msg2').textContent=`Listo: aplica el ${r.descuento}% de descuento. Canjeado el ${r.canjeado} en ${r.sucursal}.`; }
     else $('msg2').textContent=r.error;
   }catch(e){ $('msg2').textContent='Sin conexión. Intenta otra vez.'; }
   $('bCanjear').disabled=false;
