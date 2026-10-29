@@ -242,7 +242,7 @@ function empezar(){ SND.on(); tiro=0; goles=0; hist=[]; capa(null); resetTiro();
 function pintarRecord(){ const r=PP.record('penales'); $('record').textContent=r!==null?`Tu récord: ${r} de 5`:''; }
 $('bJugar').onclick=empezar; $('bOtra').onclick=empezar;
 medir(); resetTiro(); estado='menu'; pintarRecord();
-PP.init({protegidos:['bJugar','bOtra'],clave:'penales',titulo:'¡Campeón!',mensaje:'Le ganaste a Jalapeño. ¡Plázido te invita!',logo:A.logo,img:A.feliz,alRejugar:empezar});
+PP.init({protegidos:['bJugar','bOtra'],casa:{bottom:'12px',right:'64px'},clave:'penales',titulo:'¡Campeón!',mensaje:'Le ganaste a Jalapeño. ¡Plázido te invita!',logo:A.logo,img:A.feliz,alRejugar:empezar});
 requestAnimationFrame(bucle);
 </script>
 </body>

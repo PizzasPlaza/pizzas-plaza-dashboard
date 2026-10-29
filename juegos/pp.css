@@ -66,3 +66,10 @@
 .ppMini{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:6px}
 .ppMini img{width:150px;background:#FFF8E7;border-radius:10px;padding:4px 8px}
 .ppMini span{font-family:'Bebas Neue',Impact,sans-serif;font-size:17px;letter-spacing:1.5px;opacity:.85}
+
+#ppCasa{position:fixed;z-index:70;width:44px;height:44px;border-radius:50%;border:3px solid #FCC10C;background:#422913;color:#fff;font-size:20px;line-height:1;padding:0;box-shadow:0 3px 0 rgba(0,0,0,.35);cursor:pointer}
+#ppCasa:active{transform:scale(.92)}
+#ppSalir{position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;font-family:Nunito,sans-serif}
+#ppSalir.on{display:flex}
+#ppSalir .ppCaja{background:#fff;color:#422913;border-radius:16px;padding:18px;width:88%;max-width:330px;text-align:center}
+#ppSalir button{font-family:Nunito,sans-serif;font-weight:900;font-size:16px;border:0;border-radius:10px;padding:10px 14px;margin:4px}

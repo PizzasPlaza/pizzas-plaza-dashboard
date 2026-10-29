@@ -175,7 +175,7 @@ $('bJugar').onclick=()=>{ SND.on(); nivel=0; movsTotal=0; iniciarNivel(); };
 $('bSeguir').onclick=()=>{ nivel=1; iniciarNivel(); };
 $('bOtra').onclick=()=>{ if(nivel===0) movsTotal=0; iniciarNivel(); };
 pintarRecord();
-PP.init({protegidos:['bJugar','bOtra'],clave:'memorama',titulo:'¡Memoria de chef!',mensaje:'Encontraste todas las parejas. ¡Plázido te invita!',logo:A.logo,img:A.saludando,alRejugar:()=>{ nivel=0; movsTotal=0; iniciarNivel(); }});
+PP.init({protegidos:['bJugar','bOtra'],casa:{bottom:'12px',right:'64px'},clave:'memorama',titulo:'¡Memoria de chef!',mensaje:'Encontraste todas las parejas. ¡Plázido te invita!',logo:A.logo,img:A.saludando,alRejugar:()=>{ nivel=0; movsTotal=0; iniciarNivel(); }});
 </script>
 </body>
 </html>

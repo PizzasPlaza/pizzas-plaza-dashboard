@@ -31,7 +31,7 @@ body:before{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .carta .ilu span{line-height:1}
 .carta .nom{font-family:Rye,Georgia,serif;width:100%;text-align:center;border-top:2px solid #2A2A2A;background:#FFF3DC;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* juego */
-#juego{justify-content:flex-start;gap:8px;padding-top:8px}
+#juego{justify-content:flex-start;gap:8px;padding-top:8px;padding-bottom:62px}
 .top{width:100%;max-width:440px;display:flex;gap:10px;align-items:stretch}
 #cantada{width:112px;height:150px;flex:none;box-shadow:0 6px 0 rgba(0,0,0,.18);transform-origin:center}
 #cantada.entra{animation:entra .45s cubic-bezier(.2,1.5,.5,1)}
@@ -223,7 +223,7 @@ function terminar(msg){ activo=false; SND.pierde(); try{speechSynthesis.cancel()
 function confeti(){ const c=['#D6246E','#FCC10C','#0F8A5F','#2B7BD6','#F07A1A']; for(let i=0;i<70;i++){ const d=document.createElement('div'); d.className='confeti';
   d.style.left=Math.random()*100+'vw'; d.style.background=c[i%5]; d.style.animationDuration=(1.8+Math.random()*1.8)+'s'; d.style.animationDelay=Math.random()*.5+'s'; document.body.appendChild(d); setTimeout(()=>d.remove(),4200);} }
 $('bJugar').onclick=empezar; $('bOtra').onclick=empezar;
-PP.init({protegidos:['bJugar','bOtra'],clave:'loteria',titulo:'¡LOTERÍA!',mensaje:'¡Buena tabla! Plázido te regala tu descuento.',logo:A.logo,img:A.saludando,alRejugar:empezar});
+PP.init({protegidos:['bJugar','bOtra'],casa:{bottom:'10px',right:'106px'},clave:'loteria',titulo:'¡LOTERÍA!',mensaje:'¡Buena tabla! Plázido te regala tu descuento.',logo:A.logo,img:A.saludando,alRejugar:empezar});
 </script>
 </body>
 </html>

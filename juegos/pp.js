@@ -128,8 +128,21 @@ const PP = (()=>{
     }
     proteger(cfg.protegidos);
     marca();
+    if(!cfg.sinCupon) botonCasa(cfg.casa||{bottom:'12px',right:'64px'});
     addEventListener('hashchange',()=>{ if(location.hash==='#validar') location.href=base+'caja.html'; else sucursal(); });
     return false;
+  }
+  // ---------- botón para regresar al portal ----------
+  function botonCasa(pos){
+    const b=document.createElement('button'); b.id='ppCasa'; b.setAttribute('aria-label','Regresar al menú de juegos'); b.innerHTML='🏠';
+    Object.assign(b.style,pos); document.body.appendChild(b);
+    const m=document.createElement('div'); m.id='ppSalir'; m.innerHTML=`<div class="ppCaja"><div style="font-weight:900;font-size:20px">¿Regresar al menú de juegos?</div>
+      <div style="font-size:14px;margin:6px 0 12px">Si estás jugando, se pierde la partida actual.</div>
+      <button id="ppSalirSi" style="background:#422913;color:#FCC10C">SÍ, SALIR</button><button id="ppSalirNo" style="background:#ddd">SEGUIR JUGANDO</button></div>`;
+    document.body.appendChild(m);
+    const ir=()=>{ const s=store.get('pp_suc'); location.href=base+'index.html'+(s?'#'+encodeURIComponent(s.replace(/ /g,'-')):''); };
+    b.addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation(); m.classList.add('on'); });
+    m.querySelector('#ppSalirSi').onclick=ir; m.querySelector('#ppSalirNo').onclick=()=>m.classList.remove('on');
   }
   // ---------- marca: pantalla de bienvenida y slogan ----------
   function marca(){
