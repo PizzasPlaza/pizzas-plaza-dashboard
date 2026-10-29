@@ -41,6 +41,7 @@ small{opacity:.7;font-weight:700;text-align:center}
   <div class="estado" id="estado"></div>
   <div class="datos" id="datos"></div>
   <div id="zonaCanje">
+    <label id="telConfBox" style="display:none">Celular del cliente (para confirmar)<input id="telConf" type="tel" inputmode="numeric" maxlength="10" placeholder="10 dígitos"></label>
     <label>PIN de tu sucursal<input id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></label>
     <button class="verde" id="bCanjear" style="width:100%;margin-top:8px">APLICAR DESCUENTO Y CANJEAR</button>
   </div>
@@ -67,7 +68,7 @@ $('bVal').onclick=async()=>{
   const val=$('cod').value.trim().toUpperCase(); const esTel=/^\d{10}$/.test(val);
   if(!esTel && val.length<11){ $('msg').textContent='Escribe el código completo o los 10 dígitos del celular.'; return; }
   $('msg').textContent='Consultando…'; $('bVal').disabled=true; $('res').style.display='none';
-  try{ const r=await api(esTel?{accion:'validar',tel:val}:{accion:'validar',codigo:val}); $('msg').textContent=''; codigo=r.codigo||val; telCli=r.telCompleto||(esTel?val:''); verPas(r.pasaporte,false);
+  try{ const r=await api(esTel?{accion:'validar',tel:val}:{accion:'validar',codigo:val}); $('msg').textContent=''; codigo=r.codigo||val; telCli=r.telCompleto||(esTel?val:''); $('telConfBox').style.display=esTel?'none':''; $('telConf').value=''; window._esTel=esTel; verPas(r.pasaporte,false);
     $('zonaCanje').style.display='';
     $('res').style.display='flex'; $('msg2').textContent='';
     if(!r.existe){ $('estado').className='estado NOEXISTE'; $('estado').textContent='NO EXISTE'; $('datos').textContent=esTel?'Este celular no tiene cupones. No aplicar descuento.':'Este código no está en el sistema. No aplicar descuento.'; $('zonaCanje').style.display=(r.pasaporte&&r.pasaporte.pizzasListas>0)?'':'none'; $('bCanjear').style.display='none'; }
@@ -81,7 +82,9 @@ $('bVal').onclick=async()=>{
 };
 $('bCanjear').onclick=async()=>{
   $('bCanjear').disabled=true; $('msg2').textContent='Canjeando…';
-  try{ const r=await api({accion:'canjear',codigo,pin:$('pin').value});
+  const telUsar=window._esTel?telCli:$('telConf').value.replace(/\D/g,'');
+  if(!window._esTel && telUsar.length!==10){ $('msg2').textContent='Pídele al cliente su celular (10 dígitos) para confirmar.'; $('bCanjear').disabled=false; return; }
+  try{ const r=await api({accion:'canjear',codigo,tel:telUsar,pin:$('pin').value});
     if(r.ok){ $('estado').className='estado CANJEADO'; $('estado').textContent='CANJEADO ✓'; $('bCanjear').style.display='none'; $('msg2').textContent=`Listo: aplica ${r.premio?r.premio.texto:r.descuento+'% de descuento'}. Canjeado el ${r.canjeado} en ${r.sucursal}. +1 rebanada 🍕`; verPas(r.pasaporte,true); }
     else $('msg2').textContent=r.error;
   }catch(e){ $('msg2').textContent='Sin conexión. Intenta otra vez.'; }

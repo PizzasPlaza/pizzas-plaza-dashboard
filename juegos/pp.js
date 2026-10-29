@@ -74,9 +74,8 @@ const PP = (()=>{
   </div>
   <div class="ppComo" id="ppComo">
     <b>¿Cómo lo uso en mi próxima visita?</b>
-    <span>📱 Solo di tu <b>número de celular</b> en caja, o abre Luna Plaza Park y toca <b>🎟️ Mi cupón</b>.</span>
+    <span>📱 Solo di tu <b>número de celular</b> en caja, o abre Luna Plaza Park y toca <b>🎟️ Mi cupón</b>. El premio es personal: solo lo puede usar el celular que lo ganó.</span>
   </div>
-  <a class="ppBtn ppWa" id="ppWa" target="_blank" rel="noopener">📲 GUARDARLO EN MI WHATSAPP</a>
   <button class="ppBtn ppVerde" id="ppCanjear">CANJEAR EN CAJA</button>
   <button class="ppBtn ppSec" id="ppReintentar" style="display:none">REINTENTAR</button>
   <p class="ppLegal">Válido en tu siguiente visita en sucursales Pizzas Plaza participantes, no en la cuenta del día en que lo ganaste. Un cupón por cliente por semana, no acumulable con otras promociones. Cada cupón canjeado suma una rebanada a tu Pasaporte Plázido.</p>
@@ -101,9 +100,7 @@ const PP = (()=>{
     $('ppEstado').innerHTML=usado?`<div class="ppCanjeado">✓ CANJEADO</div><div class="ppVig">${c.canjeado||''}</div>`:vencido?'<div class="ppCanjeado" style="background:#92400E">VENCIDO</div>':bloqueado?`<div class="ppBloq">🔒 Se activa el ${fmt(c.desde)}</div>`:'';
     const activo=!usado&&!vencido;
     pintarPas(c.pasaporte,false);
-    const urlPortal=new URL(base+'index.html',location.href).href;
-    $('ppWa').href='https://wa.me/?text='+encodeURIComponent(`🍕 Mi cupón de Pizzas Plaza: *${c.codigo}*\n${pr.emoji||'🎁'} ${pr.texto} en mi próxima visita.\nLo puedo usar del ${c.desde?fmt(c.desde):'día de hoy'} al ${fmt(c.vence)}.\nEn caja doy mi celular o lo abro aquí: ${urlPortal}`);
-    $('ppWa').style.display=activo?'':'none'; $('ppComo').style.display=activo?'':'none';
+    $('ppComo').style.display=activo?'':'none';
     $('ppCanjear').style.display=activo&&!bloqueado?'':'none'; $('ppVivo').style.display=activo?'':'none';
     $('ppCod').style.textDecoration=activo?'':'line-through'; $('ppCod').style.opacity=activo?'':'.5';
     $('ppCupBox').classList.toggle('anim',activo);
@@ -143,7 +140,7 @@ const PP = (()=>{
       $('ppCanjear').onclick=()=>{ $('ppPin').value=''; $('ppPinErr').textContent=''; $('ppModal').classList.add('on'); setTimeout(()=>$('ppPin').focus(),50); };
       $('ppPinNo').onclick=()=>$('ppModal').classList.remove('on');
       $('ppPinOk').onclick=async()=>{ $('ppPinOk').disabled=true; $('ppPinErr').textContent='Verificando…';
-        try{ const r=await api({accion:'canjear',codigo:actual.codigo,pin:$('ppPin').value,suc:sucursal()});
+        try{ const r=await api({accion:'canjear',codigo:actual.codigo,tel:store.get('pp_tel')||'',pin:$('ppPin').value,suc:sucursal()});
           if(!r.ok){ $('ppPinErr').textContent=r.error; } else { actual.estado='CANJEADO'; actual.canjeado=r.canjeado+(r.sucursal?' · '+r.sucursal:''); actual.pasaporte=r.pasaporte; $('ppModal').classList.remove('on'); pintar(actual); pintarPas(r.pasaporte,true); }
         }catch(e){ $('ppPinErr').textContent='Sin conexión. Intenta otra vez.'; }
         $('ppPinOk').disabled=false; };
