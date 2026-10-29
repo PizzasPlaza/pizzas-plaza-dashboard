@@ -73,7 +73,8 @@ $('bVal').onclick=async()=>{
     if(!r.existe){ $('estado').className='estado NOEXISTE'; $('estado').textContent='NO EXISTE'; $('datos').textContent=esTel?'Este celular no tiene cupones. No aplicar descuento.':'Este código no está en el sistema. No aplicar descuento.'; $('zonaCanje').style.display=(r.pasaporte&&r.pasaporte.pizzasListas>0)?'':'none'; $('bCanjear').style.display='none'; }
     else { $('estado').className='estado '+r.estado; $('estado').textContent=r.estado==='ACTIVO'?'✓ VÁLIDO':r.estado;
       if(r.estado==='TODAVÍA NO') r.estado='TODAVÍA'; $('estado').className='estado '+r.estado; $('estado').textContent=r.estado==='ACTIVO'?'✓ VÁLIDO':r.estado==='TODAVÍA'?'🔒 TODAVÍA NO':r.estado;
-      $('datos').innerHTML=`${r.estado==='TODAVÍA'?'<b>Este cupón se puede usar a partir del '+r.desde+'.</b> No aplicar descuento hoy.<br>':''}Código: <b>${r.codigo}</b><br>Cliente: <b>${r.nombre||'—'}</b> (${r.tel})${esTel?' — <b>pregúntale su nombre para confirmar</b>':''}<br>Juego: ${r.juego}<br>Emitido: ${r.emitido}<br>Vence: ${r.vence}`+(r.canjeado?`<br><b>Canjeado: ${r.canjeado}${r.sucCanje?' en '+r.sucCanje:''}</b>`:'')+`<br>Descuento: <b>${r.descuento}%</b>`;
+      const pr=r.premio||{texto:'15% de descuento',emoji:'🍕'};
+      $('datos').innerHTML=`<div style="font-size:22px;font-weight:900;background:#FFF3C4;border-radius:10px;padding:6px 10px;margin-bottom:6px">${pr.emoji||'🎁'} ${pr.texto}</div>${r.estado==='TODAVÍA'?'<b>Este cupón se puede usar a partir del '+r.desde+'.</b> No aplicar descuento hoy.<br>':''}Código: <b>${r.codigo}</b><br>Cliente: <b>${r.nombre||'—'}</b> (${r.tel})${esTel?' — <b>pregúntale su nombre para confirmar</b>':''}<br>Juego: ${r.juego}<br>Emitido: ${r.emitido}<br>Vence: ${r.vence}`+(r.canjeado?`<br><b>Canjeado: ${r.canjeado}${r.sucCanje?' en '+r.sucCanje:''}</b>`:'');
       const premio=r.pasaporte&&r.pasaporte.pizzasListas>0; $('zonaCanje').style.display=(r.estado==='ACTIVO'||premio)?'':'none'; $('bCanjear').style.display=r.estado==='ACTIVO'?'':'none'; }
   }catch(e){ $('msg').textContent='Sin conexión. Intenta otra vez.'; }
   $('bVal').disabled=false;
@@ -81,7 +82,7 @@ $('bVal').onclick=async()=>{
 $('bCanjear').onclick=async()=>{
   $('bCanjear').disabled=true; $('msg2').textContent='Canjeando…';
   try{ const r=await api({accion:'canjear',codigo,pin:$('pin').value});
-    if(r.ok){ $('estado').className='estado CANJEADO'; $('estado').textContent='CANJEADO ✓'; $('bCanjear').style.display='none'; $('msg2').textContent=`Listo: aplica el ${r.descuento}% de descuento. Canjeado el ${r.canjeado} en ${r.sucursal}. +1 rebanada 🍕`; verPas(r.pasaporte,true); }
+    if(r.ok){ $('estado').className='estado CANJEADO'; $('estado').textContent='CANJEADO ✓'; $('bCanjear').style.display='none'; $('msg2').textContent=`Listo: aplica ${r.premio?r.premio.texto:r.descuento+'% de descuento'}. Canjeado el ${r.canjeado} en ${r.sucursal}. +1 rebanada 🍕`; verPas(r.pasaporte,true); }
     else $('msg2').textContent=r.error;
   }catch(e){ $('msg2').textContent='Sin conexión. Intenta otra vez.'; }
   $('bCanjear').disabled=false;

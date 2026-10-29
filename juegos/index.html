@@ -42,7 +42,7 @@ footer{text-align:center;font-size:12px;opacity:.6;font-weight:700;padding:0 20p
 <header>
   <img class="logo" src="img/logo.png" alt="Pizzas Plaza">
   <div style="margin-top:14px"><div class="lpp grande"><span class="lppLuna"></span><span>LUNA PLAZA <b>PARK</b></span></div></div>
-  <p style="margin-top:10px">El parque de juegos de Pizzas Plaza. Escoge tu juego, ayuda a Plázido y llévate un descuento.</p>
+  <p style="margin-top:10px">El parque de juegos de Pizzas Plaza. Escoge tu juego, ayuda a Plázido y llévate un premio.</p>
   <img class="plaz izq" src="img/saludando.webp" alt="">
   <img class="plaz der" src="img/feliz.webp" alt="">
 </header>
@@ -50,7 +50,7 @@ footer{text-align:center;font-size:12px;opacity:.6;font-weight:700;padding:0 20p
   <div class="hola" id="hola" style="display:none"><span id="holaTxt"></span><span style="display:flex;gap:10px;align-items:center"><button id="bMiCupon2" style="background:#16A34A;color:#fff;border-radius:10px;padding:7px 10px;text-decoration:none">🎟️ Mi cupón</button><button id="bCambiar">Cambiar número</button></span></div>
   <div class="pasa" id="pasa" style="display:none"><canvas id="pasaCv"></canvas><div><b class="pasaTit">🍕 Tu Pasaporte Plázido</b><span id="pasaTxt"></span></div></div>
   <div class="miCup" id="miCup" style="display:none"><span id="miCupTxt"></span><button id="bMiCupon">🎟️ VER MI CUPÓN</button></div>
-  <div class="premio"><b>15% DE DESCUENTO</b>en tu próxima pizza si ganas</div>
+  <div class="premio"><b>🎁 PREMIOS SORPRESA</b>descuentos, refrescos, postres y más en tu próxima visita</div>
 
   <a class="card" data-juego="invasion-de-moscas" data-href="invasion-de-moscas/">
     <div class="foto" style="background:#070B1C"><img src="img/t_invasion.webp" alt="" style="object-position:center 30%"><span class="tag" style="background:#C8102E">🪰 NUEVO</span></div>
@@ -120,7 +120,7 @@ document.getElementById('bMiCupon2').onclick=async()=>{ const t=document.getElem
   setTimeout(hola,3000); };
 async function revisarCupon(){ const r=await PP.miCupon(false); const b=document.getElementById('miCup'); const fm=d=>new Date(d).toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
   if(r&&r.existe&&r.estado==='ACTIVO'){ b.style.display='flex'; const bloq=r.desde&&new Date(r.desde)>new Date();
-    document.getElementById('miCupTxt').textContent=bloq?`🔒 Tu ${r.descuento}% se activa el ${fm(r.desde)}`:`🎉 Tienes ${r.descuento}% de descuento hasta el ${fm(r.vence)}`; } else b.style.display='none';
+    const pt=r.premio?(r.premio.emoji+' '+r.premio.texto):(r.descuento+'% de descuento'); document.getElementById('miCupTxt').textContent=bloq?`🔒 Tu premio (${pt}) se activa el ${fm(r.desde)}`:`🎉 Tienes ${pt} hasta el ${fm(r.vence)}`; } else b.style.display='none';
   const ps=r&&r.pasaporte; if(ps){ document.getElementById('pasa').style.display='flex'; PASAPORTE.pintar(document.getElementById('pasaCv'),ps.rebanadas,'./',false);
     document.getElementById('pasaTxt').innerHTML=ps.pizzasListas>0?'🎉 <b>¡Completaste tu pizza!</b> Pide tu pizza mediana gratis en caja.':`<b>${ps.rebanadas} de 8 rebanadas.</b> Cada cupón que canjeas colorea una rebanada. Con las 8: <b>¡pizza mediana gratis!</b>`; } }
 revisarCupon();

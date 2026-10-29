@@ -62,8 +62,8 @@ const PP = (()=>{
   <h1 class="ppTit" id="ppTitulo">${cfg.titulo}</h1>
   <p class="ppMsg" id="ppMensaje">${cfg.mensaje||''}</p>
   <div class="ppCup" id="ppCupBox">
-    <div class="ppPct">${DESCUENTO}%</div>
-    <div class="ppQue">de descuento en tu <b>próxima visita</b> a Pizzas Plaza</div>
+    <div class="ppPct" id="ppPct">${DESCUENTO}%</div>
+    <div class="ppQue" id="ppQue">de descuento en tu <b>próxima visita</b> a Pizzas Plaza</div>
     <div class="ppCod" id="ppCod">· · ·</div>
     <div class="ppVig" id="ppVig"></div>
     <div class="ppVivo" id="ppVivo"><i></i><span id="ppReloj"></span></div>
@@ -94,12 +94,15 @@ const PP = (()=>{
   function pintar(c){
     actual=c; const usado=c.estado==='CANJEADO', vencido=c.estado==='VENCIDO'||(c.estado==='ACTIVO'&&new Date(c.vence)<new Date());
     const bloqueado=!usado&&!vencido&&c.desde&&new Date(c.desde)>new Date();
+    const pr=c.premio||{texto:DESCUENTO+'% de descuento',tipo:'DESCUENTO',valor:DESCUENTO,emoji:'🍕'};
+    if(pr.tipo==='PRODUCTO'){ $('ppPct').innerHTML=`<span class="ppPrem">${pr.emoji||'🎁'} ${pr.texto}</span>`; $('ppQue').innerHTML='en tu <b>próxima visita</b> a Pizzas Plaza'; }
+    else { $('ppPct').textContent=(pr.valor||DESCUENTO)+'%'; $('ppQue').innerHTML='de descuento en tu <b>próxima visita</b> a Pizzas Plaza'; }
     $('ppCod').textContent=c.codigo; $('ppVig').innerHTML=vencido?'Venció el '+fmt(c.vence):c.desde?`Úsalo del <b>${fmt(c.desde)}</b> al <b>${fmt(c.vence)}</b>`:'Válido hasta el '+fmt(c.vence);
     $('ppEstado').innerHTML=usado?`<div class="ppCanjeado">✓ CANJEADO</div><div class="ppVig">${c.canjeado||''}</div>`:vencido?'<div class="ppCanjeado" style="background:#92400E">VENCIDO</div>':bloqueado?`<div class="ppBloq">🔒 Se activa el ${fmt(c.desde)}</div>`:'';
     const activo=!usado&&!vencido;
     pintarPas(c.pasaporte,false);
     const urlPortal=new URL(base+'index.html',location.href).href;
-    $('ppWa').href='https://wa.me/?text='+encodeURIComponent(`🍕 Mi cupón de Pizzas Plaza: *${c.codigo}*\n${DESCUENTO}% de descuento en mi próxima visita.\nLo puedo usar del ${c.desde?fmt(c.desde):'día de hoy'} al ${fmt(c.vence)}.\nEn caja doy mi celular o lo abro aquí: ${urlPortal}`);
+    $('ppWa').href='https://wa.me/?text='+encodeURIComponent(`🍕 Mi cupón de Pizzas Plaza: *${c.codigo}*\n${pr.emoji||'🎁'} ${pr.texto} en mi próxima visita.\nLo puedo usar del ${c.desde?fmt(c.desde):'día de hoy'} al ${fmt(c.vence)}.\nEn caja doy mi celular o lo abro aquí: ${urlPortal}`);
     $('ppWa').style.display=activo?'':'none'; $('ppComo').style.display=activo?'':'none';
     $('ppCanjear').style.display=activo&&!bloqueado?'':'none'; $('ppVivo').style.display=activo?'':'none';
     $('ppCod').style.textDecoration=activo?'':'line-through'; $('ppCod').style.opacity=activo?'':'.5';
