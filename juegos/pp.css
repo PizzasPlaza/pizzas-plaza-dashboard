@@ -56,3 +56,13 @@
 #ppSplash .ppMarca{animation:ppEntra .6s cubic-bezier(.2,1.4,.5,1)}
 .ppSplashP{height:150px;animation:ppFlota 2s ease-in-out infinite}
 @keyframes ppEntra{from{transform:scale(.6);opacity:0}}
+
+/* ===== identidad Pizzas Plaza en todos los juegos ===== */
+.btn:not(.wa){background:#422913!important;color:#FCC10C!important;border:3px solid #FCC10C!important;box-shadow:0 6px 0 #1E1208!important;font-family:'Bebas Neue',Impact,sans-serif!important;letter-spacing:1.5px!important}
+.btn.sec:not(.wa),.btn.verde{background:#FCC10C!important;color:#422913!important;border-color:#422913!important;box-shadow:0 6px 0 #A87F00!important}
+.ppBtn{background:#422913;color:#FCC10C;border:3px solid #FCC10C;font-family:'Bebas Neue',Impact,sans-serif;letter-spacing:1.5px;font-size:26px}
+.ppBtn.ppVerde{background:#16A34A;color:#fff;border-color:#fff}
+.ppBtn.ppSec{background:#FCC10C;color:#422913;border-color:#422913;font-size:20px}
+.ppMini{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:6px}
+.ppMini img{width:150px;background:#FFF8E7;border-radius:10px;padding:4px 8px}
+.ppMini span{font-family:'Bebas Neue',Impact,sans-serif;font-size:17px;letter-spacing:1.5px;opacity:.85}

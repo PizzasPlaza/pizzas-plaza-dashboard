@@ -70,7 +70,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
   <div class="logoBox"><img class="logo" data-a="logo" alt="Pizzas Plaza"></div>
   <h1 class="titulo">La Cocina<br>Embrujada</h1>
   <img class="plaz" data-a="saludando" alt="Plázido">
-  <p class="txt">¡Los amigos de Plázido están cayendo en la cocina embrujada! Desliza el dedo para atraparlos y esquiva fantasmas, murciélagos y calabazas.</p>
+  <p class="txt">¡Los amigos de Plázido están cayendo en la cocina embrujada de Pizzas Plaza! Atrápalos, junta las cajas de Pizzas Plaza (+25) y esquiva fantasmas, murciélagos y calabazas.</p>
   <div class="premio">🎃 Haz <span class="vMeta"></span> puntos y gana <span class="vPct"></span>% de descuento</div>
   <button class="btn" id="bJugar">JUGAR</button>
   <p class="chico" id="record"></p>
@@ -249,6 +249,7 @@ function crear(tipo){
   const o={tipo,x,y:-s,s,t:Math.random()*10,rot:(Math.random()-.5)*.6,vr:(Math.random()-.5)*2.5};
   if(tipo==='amigo'){ o.img=AMIGOS[Math.floor(Math.random()*5)]; o.vy=(150+Math.random()*60)*dif; }
   if(tipo==='dorada'){ o.vy=230*dif; o.s=s*.9; }
+  if(tipo==='caja'){ o.vy=200*dif; o.s=s*.95; }
   if(tipo==='fantasma'){ o.vy=(95+Math.random()*40)*dif; o.amp=40+Math.random()*50; o.x0=x; }
   if(tipo==='calabaza'){ o.vy=(230+Math.random()*80)*dif; o.s=s*.85; }
   if(tipo==='murcielago'){ o.vy=(120+Math.random()*40)*dif; o.vx=(Math.random()<.5?-1:1)*(140+Math.random()*80); o.s=s*.8; }
@@ -280,7 +281,7 @@ function actualizar(dt){
   if(tiempo<=0){ tiempo=0; hud(); return terminar(); }
   const dif=1+transcurrido/28;
   spawnA-=dt; spawnM-=dt;
-  if(spawnA<=0){ crear(Math.random()<.07?'dorada':'amigo'); spawnA=Math.max(.38,.85/dif)*(.7+Math.random()*.6); }
+  if(spawnA<=0){ const r=Math.random(); crear(r<.07?'dorada':r<.14?'caja':'amigo'); spawnA=Math.max(.38,.85/dif)*(.7+Math.random()*.6); }
   if(spawnM<=0 && transcurrido>1.5){ const r=Math.random(); crear(r<.4?'fantasma':r<.72?'calabaza':'murcielago'); spawnM=Math.max(.55,1.6/dif)*(.7+Math.random()*.6); }
 
   // Plázido
@@ -296,6 +297,7 @@ function actualizar(dt){
     const d=Math.hypot(o.x-cx,o.y-cy), hit=d<cr+o.s*.36;
     if(hit){
       if(o.tipo==='amigo'){ combo++; const pts=10*multiplicador(); puntos+=pts; sfx.atrapa(Math.min(combo,10)); vib(12); chispas(o.x,o.y,'#FCC10C'); texto(o.x,o.y,'+'+pts,'#FCC10C'); ponerPose('feliz',.45); }
+      else if(o.tipo==='caja'){ combo++; puntos+=25; sfx.atrapa(10); vib(20); chispas(o.x,o.y,'#FCC10C',20); texto(o.x,o.y,'+25 PIZZAS PLAZA','#FCC10C'); ponerPose('feliz',.6); }
       else if(o.tipo==='dorada'){ combo++; puntos+=50; lento=3; sfx.dorada(); vib([20,30,20]); chispas(o.x,o.y,'#FFE066',30); texto(o.x,o.y,'+50 ¡LENTO!','#FFE066'); ponerPose('feliz',.7); }
       else { golpe(o); }
       obj.splice(i,1); hud(); if(!jugando) return; continue;
@@ -320,6 +322,9 @@ function dibujar(dt){
   obj.forEach(o=>{
     if(o.tipo==='amigo'){ const im=IMG[o.img]; if(!im.complete) return; const h=o.s*1.15, w=h*im.width/im.height;
       ctx.save(); ctx.translate(o.x,o.y); ctx.rotate(Math.sin(o.t*3)*.25); ctx.shadowColor='rgba(252,193,12,.55)'; ctx.shadowBlur=14; ctx.drawImage(im,-w/2,-h/2,w,h); ctx.restore(); }
+    else if(o.tipo==='caja'){ const s=o.s*.9; ctx.save(); ctx.translate(o.x,o.y); ctx.rotate(Math.sin(o.t*3)*.2); ctx.shadowColor='#FCC10C'; ctx.shadowBlur=16;
+      ctx.fillStyle='#C9A06A'; ctx.fillRect(-s/2,-s/2,s,s); ctx.shadowBlur=0; ctx.strokeStyle='#422913'; ctx.lineWidth=2.5; ctx.strokeRect(-s/2,-s/2,s,s); ctx.fillStyle='#FCC10C'; ctx.fillRect(-s/2,-s/2,s,s*.18);
+      const ic=IMG.icono; if(ic&&ic.complete) ctx.drawImage(ic,-s*.34,-s*.22,s*.68,s*.68*ic.height/ic.width); ctx.restore(); }
     else if(o.tipo==='dorada'){ ctx.save(); ctx.shadowColor='#FFE066'; ctx.shadowBlur=25; calabaza(ctx,o.x,o.y,o.s*.45,true,1,false,true); ctx.restore(); }
     else if(o.tipo==='calabaza'){ ctx.save(); ctx.translate(o.x,o.y); ctx.rotate(o.rot); calabaza(ctx,0,0,o.s*.45,true,1,true); ctx.restore(); }
     else if(o.tipo==='fantasma') fantasma(ctx,o.x,o.y,o.s*.5,o.t);

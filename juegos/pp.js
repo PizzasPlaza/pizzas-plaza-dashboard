@@ -135,6 +135,7 @@ const PP = (()=>{
   function marca(){
     // slogan debajo del primer logo de la pantalla de inicio
     const l=document.querySelector('.logoBox, img.logo, .logo'); if(l && !document.querySelector('.ppSloganIni')){ const s=document.createElement('p'); s.className='ppSlogan ppSloganIni'; s.textContent='Hechas en serio, no en serie'; (l.closest('.logoBox')||l).after(s); }
+    document.querySelectorAll('#fin, #entre').forEach(sc=>{ if(sc.querySelector('.ppMini')) return; const m=document.createElement('div'); m.className='ppMini'; m.innerHTML=`<img src="${base}img/logo.png" alt="Pizzas Plaza"><span>Hechas en serio, no en serie</span>`; sc.appendChild(m); });
     let visto=false; try{ visto=sessionStorage.getItem('pp_splash')==='1'; sessionStorage.setItem('pp_splash','1'); }catch(e){}
     if(visto) return;
     const d=document.createElement('div'); d.id='ppSplash';
