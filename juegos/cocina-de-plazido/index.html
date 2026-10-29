@@ -128,6 +128,15 @@ function pintarFondo(){
     if(!muro(x,y+1)) { g.beginPath(); g.moveTo(px,py+T-1); g.lineTo(px+T,py+T-1); g.stroke(); }
     if(!muro(x-1,y)) { g.beginPath(); g.moveTo(px+1,py); g.lineTo(px+1,py+T); g.stroke(); }
     if(!muro(x+1,y)) { g.beginPath(); g.moveTo(px+T-1,py); g.lineTo(px+T-1,py+T); g.stroke(); } }
+  // utensilios colgados en algunas barras interiores
+  const UT=['🍳','🥄','🧂','🍅','🧀','🫕','🍕','🌿'];
+  let k=0; g.textAlign='center'; g.textBaseline='middle'; g.font=`${T*.72}px sans-serif`;
+  for(let y=1;y<FILAS-1;y++) for(let x=1;x<COLS-1;x++){ if(!muro(x,y)) continue; if((x*7+y*13)%5!==0) continue; if(x>=6&&x<=10&&y>=6&&y<=9) continue;
+    g.globalAlpha=.9; g.fillText(UT[k++%UT.length],OX+(x+.5)*T,OY+(y+.5)*T); g.globalAlpha=1; }
+  // manchas de harina en el piso
+  for(let i=0;i<14;i++){ const x=(i*37)%COLS, y=(i*53)%FILAS; if(muro(x,y)) continue; g.fillStyle='rgba(255,255,255,.35)'; g.beginPath(); g.ellipse(OX+(x+.3)*T,OY+(y+.7)*T,T*.35,T*.18,i,0,7); g.fill(); }
+  // letrero arriba del laberinto
+  g.font=`900 ${Math.max(12,T*.8)}px "Bebas Neue", Impact, sans-serif`; g.shadowColor='#FCC10C'; g.shadowBlur=10; g.fillStyle='#FCC10C'; g.fillText('🍕 LA COCINA DE PLÁZIDO 🍕',W/2,OY-T*.45); g.shadowBlur=0;
   // puerta del nido
   g.fillStyle='#C8102E'; g.fillRect(OX+PUERTA.x*T,OY+PUERTA.y*T+T*.4,T,T*.2);
   // nido = horno

@@ -311,6 +311,26 @@ function azotea(p,cx){
   for(let i=8;i<p.w;i+=18){ const on=Math.floor(reloj*3+i/18)%2; ctx.fillStyle=['#FF3B3B','#FFD23B','#3BFF7A','#3BC8FF'][(i/18|0)%4]; ctx.globalAlpha=on?1:.35; ctx.beginPath(); ctx.arc(x+i,y+10+Math.sin(i*.3)*3,3,0,7); ctx.fill(); }
   ctx.globalAlpha=1;
 }
+function tienda(p,cx){ // letrero luminoso y arbolito en la azotea de la sucursal
+  const x=p.x-cx+200+W*.22, y=p.y; if(x>W+300||x<-400) return;
+  const w=Math.min(W*.5,230), h=w*.34, by=y-PH*1.85;
+  ctx.save();
+  ctx.fillStyle='#333'; ctx.fillRect(x+w*.12,by+h,6,y-by-h); ctx.fillRect(x+w*.82,by+h,6,y-by-h);
+  const gl=ctx.createRadialGradient(x+w/2,by+h/2,5,x+w/2,by+h/2,w*.8); gl.addColorStop(0,'rgba(252,193,12,.35)'); gl.addColorStop(1,'rgba(252,193,12,0)'); ctx.fillStyle=gl; ctx.fillRect(x-w*.3,by-h,w*1.6,h*3);
+  ctx.fillStyle='#422913'; ctx.beginPath(); ctx.roundRect?ctx.roundRect(x,by,w,h,10):ctx.rect(x,by,w,h); ctx.fill(); ctx.strokeStyle='#FCC10C'; ctx.lineWidth=3; ctx.stroke();
+  const ic=IMG.icono; if(ic&&ic.complete){ const ih=h*.78; ctx.drawImage(ic,x+8,by+h*.11,ih*ic.width/ic.height,ih); }
+  ctx.shadowColor='#FCC10C'; ctx.shadowBlur=12; ctx.fillStyle='#FCC10C'; ctx.textAlign='left'; ctx.textBaseline='middle';
+  ctx.font=`900 ${h*.34}px "Bebas Neue", Impact, sans-serif`; ctx.fillText("PIZZAS PLAZA",x+h*.95,by+h*.4);
+  ctx.shadowBlur=0; ctx.fillStyle='#fff'; ctx.font=`800 ${h*.17}px Nunito, sans-serif`; ctx.fillText('¡Feliz Navidad!',x+h*.95,by+h*.76);
+  // nieve encima del letrero
+  ctx.fillStyle='#F4F8FF'; ctx.beginPath(); for(let i=0;i<=w;i+=12) ctx.arc(x+i,by+2,5+(i%24?1:3),Math.PI,0); ctx.fill();
+  // foquitos alrededor
+  for(let i=0;i<14;i++){ const t=i/13; ctx.fillStyle=(Math.floor(reloj*4)+i)%3===0?'#FF3B3B':(Math.floor(reloj*4)+i)%3===1?'#3BFF7A':'#FFF3B0'; ctx.beginPath(); ctx.arc(x+t*w,by+h+4,3,0,7); ctx.fill(); }
+  // corona navideña
+  const cx2=x+w+18, cy2=by+h*.5; ctx.strokeStyle='#0F7B3E'; ctx.lineWidth=7; ctx.beginPath(); ctx.arc(cx2,cy2,h*.33,0,7); ctx.stroke(); ctx.fillStyle='#C8102E'; ctx.beginPath(); ctx.arc(cx2,cy2+h*.33,4,0,7); ctx.fill();
+  ctx.restore();
+  arbolNavidad(x-28,y,PH*1.1);
+}
 function chimenea(o,cx){
   const x=o.x-cx, y=o.y;
   ctx.fillStyle='#8B2E1A'; ctx.fillRect(x,y,o.w,o.h);
@@ -412,7 +432,7 @@ function generar(desde){
 
 function iniciarNivel(){
   const n=N(); plats=[]; obst=[]; items=[]; pizzas=[]; parts=[]; textos=[];
-  plats.push({x:-200,w:W*1.1+200,y:H*.72,color:'#2B3A67',sem:1});
+  plats.push({x:-200,w:W*1.1+200,y:H*.72,color:'#2B3A67',sem:1,tienda:true});
   generar(W*1.1+80);
   cam=0; J.x=W*.28; J.y=H*.72; J.vy=0; J.suelo=true; J.saltos=0; J.inv=0; J.escudo=0; J.cayendo=false; J.pose='pose_2';
   entregas=0; balasEnNivel=0; proxBola=3; pintarHud();
@@ -567,7 +587,7 @@ function dibujar(dt){
   // skyline con parallax
   const sk=capasFondo[nivel]; if(sk){ const w2=sk.width/DPR, off=(cam*.25)%w2; ctx.drawImage(sk,-off,0,w2,H); ctx.drawImage(sk,w2-off,0,w2,H); }
   // azoteas
-  for(const p of plats){ azotea(p,cam); if(p.meta){ const mx=p.x-cam+140; if(mx<W+200){ // meta
+  for(const p of plats){ azotea(p,cam); if(p.tienda) tienda(p,cam); if(p.meta){ const mx=p.x-cam+140; if(mx<W+200){ // meta
         if(nivel===NIVELES.length-1){ arbolNavidad(mx+120,p.y,PH*2.4); santa(mx+20,p.y-PH*.45,PH*.6); }
         else { ctx.fillStyle='#fff'; ctx.fillRect(mx,p.y-PH*1.6,6,PH*1.6); ctx.fillStyle='#C8102E'; ctx.beginPath(); ctx.moveTo(mx+6,p.y-PH*1.6); ctx.lineTo(mx+70,p.y-PH*1.35); ctx.lineTo(mx+6,p.y-PH*1.1); ctx.fill(); ctx.fillStyle='#fff'; ctx.font='900 14px Nunito'; ctx.textAlign='left'; ctx.fillText('META',mx+12,p.y-PH*1.32); }
       } } }
