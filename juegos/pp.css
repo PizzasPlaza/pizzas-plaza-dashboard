@@ -80,3 +80,6 @@
 .lppLuna{width:22px;height:22px;border-radius:50%;box-shadow:inset -7px -2px 0 0 #FCC10C;transform:rotate(-20deg);flex:none}
 .lpp.grande{font-size:clamp(24px,7.5vw,40px);padding:9px 22px 7px 12px}
 .lpp.grande .lppLuna{width:36px;height:36px;box-shadow:inset -11px -3px 0 0 #FCC10C}
+
+.ppComo{max-width:360px;background:#FFF3C4;color:#422913;border:2px solid #FCC10C;border-radius:14px;padding:10px 12px;font-size:14px;font-weight:800;display:flex;flex-direction:column;gap:4px;text-align:left}
+.ppWa{background:#25D366!important;color:#fff!important;border-color:#fff!important;text-decoration:none;font-size:20px!important}

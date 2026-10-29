@@ -63,7 +63,7 @@ const PP = (()=>{
   <p class="ppMsg" id="ppMensaje">${cfg.mensaje||''}</p>
   <div class="ppCup" id="ppCupBox">
     <div class="ppPct">${DESCUENTO}%</div>
-    <div class="ppQue">de descuento en tu próxima pizza <b>Pizzas Plaza</b></div>
+    <div class="ppQue">de descuento en tu <b>próxima visita</b> a Pizzas Plaza</div>
     <div class="ppCod" id="ppCod">· · ·</div>
     <div class="ppVig" id="ppVig"></div>
     <div class="ppVivo" id="ppVivo"><i></i><span id="ppReloj"></span></div>
@@ -71,9 +71,14 @@ const PP = (()=>{
     <div class="ppVig" id="ppSuc" style="opacity:.7"></div>
     <div class="ppSloganCup">Ganado en Luna Plaza Park · Hechas en serio, no en serie</div>
   </div>
+  <div class="ppComo" id="ppComo">
+    <b>¿Cómo lo uso en mi próxima visita?</b>
+    <span>📱 Solo di tu <b>número de celular</b> en caja, o abre Luna Plaza Park y toca <b>🎟️ Mi cupón</b>.</span>
+  </div>
+  <a class="ppBtn ppWa" id="ppWa" target="_blank" rel="noopener">📲 GUARDARLO EN MI WHATSAPP</a>
   <button class="ppBtn ppVerde" id="ppCanjear">CANJEAR EN CAJA</button>
   <button class="ppBtn ppSec" id="ppReintentar" style="display:none">REINTENTAR</button>
-  <p class="ppLegal">Muestra esta pantalla en caja. Válido en sucursales Pizzas Plaza participantes. Un cupón por cliente, no acumulable con otras promociones.</p>
+  <p class="ppLegal">Válido en tu siguiente visita en sucursales Pizzas Plaza participantes, no en la cuenta del día en que lo ganaste. Un cupón por cliente, no acumulable con otras promociones.</p>
   <button class="ppBtn ppSec" id="ppRejugar">JUGAR OTRA VEZ</button>
   ${cfg.portal!==false?`<a class="ppLink" href="${base}index.html">🌙 Regresar a Luna Plaza Park</a>`:''}
 </section>
@@ -90,6 +95,9 @@ const PP = (()=>{
     $('ppCod').textContent=c.codigo; $('ppVig').textContent=(vencido?'Venció el ':'Válido hasta el ')+fmt(c.vence);
     $('ppEstado').innerHTML=usado?`<div class="ppCanjeado">✓ CANJEADO</div><div class="ppVig">${c.canjeado||''}</div>`:vencido?'<div class="ppCanjeado" style="background:#92400E">VENCIDO</div>':'';
     const activo=!usado&&!vencido;
+    const urlPortal=new URL(base+'index.html',location.href).href;
+    $('ppWa').href='https://wa.me/?text='+encodeURIComponent(`🍕 Mi cupón de Pizzas Plaza: *${c.codigo}*\n${DESCUENTO}% de descuento en mi próxima visita. Válido hasta el ${fmt(c.vence)}.\nEn caja doy mi celular o lo abro aquí: ${urlPortal}`);
+    $('ppWa').style.display=activo?'':'none'; $('ppComo').style.display=activo?'':'none';
     $('ppCanjear').style.display=activo?'':'none'; $('ppVivo').style.display=activo?'':'none';
     $('ppCod').style.textDecoration=activo?'':'line-through'; $('ppCod').style.opacity=activo?'':'.5';
     $('ppCupBox').classList.toggle('anim',activo);
@@ -104,6 +112,13 @@ const PP = (()=>{
     partida('gano');
     try{ const r=await api({accion:'cupon',tel:store.get('pp_tel')||'',juego:cfg.clave,suc:sucursal()}); if(!r.ok) throw new Error(r.error); pintar(r); }
     catch(e){ $('ppCod').textContent='SIN CONEXIÓN'; $('ppVig').textContent='No pudimos generar tu cupón. Revisa tu internet y toca Reintentar.'; $('ppReintentar').style.display=''; }
+  }
+  // ---------- recuperar el cupón en otra visita ----------
+  async function miCupon(mostrar=true){
+    const tel=store.get('pp_tel'); if(!tel) return null;
+    try{ const r=await api({accion:'micupon',tel}); if(!r.ok||!r.existe) return r; r.yaTenia=false;
+      if(mostrar){ $('ppTitulo').textContent='🎟️ Tu cupón'; $('ppMensaje').textContent=r.estado==='ACTIVO'?'Muéstralo en caja o di tu número de celular.':'Este es tu último cupón.'; pintar(r); $('ppCupon').classList.add('on'); }
+      return r; }catch(e){ return null; }
   }
   function partida(resultado,puntos){ api({accion:'partida',tel:store.get('pp_tel')||'',juego:cfg.clave,resultado,puntos:puntos||0,suc:sucursal()}).catch(()=>{}); }
 
@@ -123,12 +138,13 @@ const PP = (()=>{
         }catch(e){ $('ppPinErr').textContent='Sin conexión. Intenta otra vez.'; }
         $('ppPinOk').disabled=false; };
       $('ppReintentar').onclick=ganar;
+      if(cfg.esPortal){ $('ppRejugar').textContent='CERRAR'; const l=document.querySelector('#ppCupon .ppLink'); if(l) l.style.display='none'; }
       $('ppRejugar').onclick=()=>{ $('ppCupon').classList.remove('on'); cfg.alRejugar&&cfg.alRejugar(); };
       setInterval(()=>{ const r=$('ppReloj'); if(r) r.textContent='Cupón en vivo · '+new Date().toLocaleTimeString('es-MX'); },500);
     }
     proteger(cfg.protegidos);
     marca();
-    if(!cfg.sinCupon) botonCasa(cfg.casa||{bottom:'12px',right:'64px'});
+    if(!cfg.sinCupon && !cfg.esPortal) botonCasa(cfg.casa||{bottom:'12px',right:'64px'});
     addEventListener('hashchange',()=>{ if(location.hash==='#validar') location.href=base+'caja.html'; else sucursal(); });
     return false;
   }
@@ -148,7 +164,7 @@ const PP = (()=>{
   function marca(){
     // slogan debajo del primer logo de la pantalla de inicio
     const l=document.querySelector('.logoBox, img.logo, .logo'); if(l && !document.querySelector('.ppSloganIni')){ const s=document.createElement('p'); s.className='ppSlogan ppSloganIni'; s.textContent='Hechas en serio, no en serie'; (l.closest('.logoBox')||l).after(s);
-      if(!cfg.sinCupon){ const w=document.createElement('div'); w.innerHTML='<div class="lpp"><span class="lppLuna"></span><span>LUNA PLAZA <b>PARK</b></span></div>'; (l.closest('.logoBox')||l).before(w.firstChild); } }
+      if(!cfg.sinCupon && !cfg.esPortal){ const w=document.createElement('div'); w.innerHTML='<div class="lpp"><span class="lppLuna"></span><span>LUNA PLAZA <b>PARK</b></span></div>'; (l.closest('.logoBox')||l).before(w.firstChild); } }
     document.querySelectorAll('#fin, #entre').forEach(sc=>{ if(sc.querySelector('.ppMini')) return; const m=document.createElement('div'); m.className='ppMini'; m.innerHTML=`<img src="${base}img/logo.png" alt="Pizzas Plaza"><span>Hechas en serio, no en serie</span>`; sc.appendChild(m); });
     let visto=false; try{ visto=sessionStorage.getItem('pp_splash')==='1'; sessionStorage.setItem('pp_splash','1'); }catch(e){}
     if(visto) return;
@@ -159,7 +175,7 @@ const PP = (()=>{
   }
   function record(clave,valor,mayorEsMejor=true){ const k='pp_'+clave+'_record'; const r=store.get(k); const n=r===null?null:+r;
     if(valor!==undefined && (n===null || (mayorEsMejor?valor>n:valor<n))){ store.set(k,valor); return valor; } return n; }
-  return {init,ganar,partida,record,store,api,antesDeJugar,proteger,registrado,cambiarNumero,sucursal,DESCUENTO};
+  return {init,ganar,miCupon,partida,record,store,api,antesDeJugar,proteger,registrado,cambiarNumero,sucursal,DESCUENTO};
 })();
 
 // ===== Audio sintetizado compartido =====
