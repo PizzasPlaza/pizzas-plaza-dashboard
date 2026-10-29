@@ -22,8 +22,8 @@ const PP = (()=>{
 <div id="ppReg" class="ppCapa">
   <div class="ppMarca"><img src="${base}img/logo.png" alt="Pizzas Plaza"></div>
   <img class="ppImg" src="${cfg.img||''}" alt="" style="height:84px">
-  <h1 class="ppTit">¡Regístrate y juega!</h1>
-  <p class="ppMsg">Solo una vez. Si ganas, tu cupón queda ligado a tu celular.</p>
+  <h1 class="ppTit">¡Bienvenido a<br>Luna Plaza Park!</h1>
+  <p class="ppMsg">Regístrate solo una vez. Si ganas, tu cupón queda ligado a tu celular.</p>
   <form id="ppRegForm" class="ppForm" autocomplete="on">
     <label>Tu nombre<input id="ppNom" name="name" autocomplete="given-name" maxlength="40" required placeholder="Ej. Ana"></label>
     <label>Tu celular (10 dígitos)<input id="ppTel" name="tel" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="14" required placeholder="55 1234 5678"></label>
@@ -69,13 +69,13 @@ const PP = (()=>{
     <div class="ppVivo" id="ppVivo"><i></i><span id="ppReloj"></span></div>
     <div id="ppEstado"></div>
     <div class="ppVig" id="ppSuc" style="opacity:.7"></div>
-    <div class="ppSloganCup">Hechas en serio, no en serie</div>
+    <div class="ppSloganCup">Ganado en Luna Plaza Park · Hechas en serio, no en serie</div>
   </div>
   <button class="ppBtn ppVerde" id="ppCanjear">CANJEAR EN CAJA</button>
   <button class="ppBtn ppSec" id="ppReintentar" style="display:none">REINTENTAR</button>
   <p class="ppLegal">Muestra esta pantalla en caja. Válido en sucursales Pizzas Plaza participantes. Un cupón por cliente, no acumulable con otras promociones.</p>
   <button class="ppBtn ppSec" id="ppRejugar">JUGAR OTRA VEZ</button>
-  ${cfg.portal!==false?`<a class="ppLink" href="${base}index.html">← Más juegos</a>`:''}
+  ${cfg.portal!==false?`<a class="ppLink" href="${base}index.html">🌙 Regresar a Luna Plaza Park</a>`:''}
 </section>
 <div id="ppModal"><div class="ppCaja">
   <div style="font-weight:900;font-size:19px">Solo para el cajero</div>
@@ -134,9 +134,9 @@ const PP = (()=>{
   }
   // ---------- botón para regresar al portal ----------
   function botonCasa(pos){
-    const b=document.createElement('button'); b.id='ppCasa'; b.setAttribute('aria-label','Regresar al menú de juegos'); b.innerHTML='🏠';
+    const b=document.createElement('button'); b.id='ppCasa'; b.setAttribute('aria-label','Regresar a Luna Plaza Park'); b.innerHTML='🏠';
     Object.assign(b.style,pos); document.body.appendChild(b);
-    const m=document.createElement('div'); m.id='ppSalir'; m.innerHTML=`<div class="ppCaja"><div style="font-weight:900;font-size:20px">¿Regresar al menú de juegos?</div>
+    const m=document.createElement('div'); m.id='ppSalir'; m.innerHTML=`<div class="ppCaja"><div style="font-weight:900;font-size:20px">¿Regresar a Luna Plaza Park?</div>
       <div style="font-size:14px;margin:6px 0 12px">Si estás jugando, se pierde la partida actual.</div>
       <button id="ppSalirSi" style="background:#422913;color:#FCC10C">SÍ, SALIR</button><button id="ppSalirNo" style="background:#ddd">SEGUIR JUGANDO</button></div>`;
     document.body.appendChild(m);
@@ -147,12 +147,13 @@ const PP = (()=>{
   // ---------- marca: pantalla de bienvenida y slogan ----------
   function marca(){
     // slogan debajo del primer logo de la pantalla de inicio
-    const l=document.querySelector('.logoBox, img.logo, .logo'); if(l && !document.querySelector('.ppSloganIni')){ const s=document.createElement('p'); s.className='ppSlogan ppSloganIni'; s.textContent='Hechas en serio, no en serie'; (l.closest('.logoBox')||l).after(s); }
+    const l=document.querySelector('.logoBox, img.logo, .logo'); if(l && !document.querySelector('.ppSloganIni')){ const s=document.createElement('p'); s.className='ppSlogan ppSloganIni'; s.textContent='Hechas en serio, no en serie'; (l.closest('.logoBox')||l).after(s);
+      if(!cfg.sinCupon){ const w=document.createElement('div'); w.innerHTML='<div class="lpp"><span class="lppLuna"></span><span>LUNA PLAZA <b>PARK</b></span></div>'; (l.closest('.logoBox')||l).before(w.firstChild); } }
     document.querySelectorAll('#fin, #entre').forEach(sc=>{ if(sc.querySelector('.ppMini')) return; const m=document.createElement('div'); m.className='ppMini'; m.innerHTML=`<img src="${base}img/logo.png" alt="Pizzas Plaza"><span>Hechas en serio, no en serie</span>`; sc.appendChild(m); });
     let visto=false; try{ visto=sessionStorage.getItem('pp_splash')==='1'; sessionStorage.setItem('pp_splash','1'); }catch(e){}
     if(visto) return;
     const d=document.createElement('div'); d.id='ppSplash';
-    d.innerHTML=`<div class="ppMarca grande"><img src="${base}img/logo.png" alt="Pizzas Plaza"></div><img class="ppSplashP" src="${base}img/saludando.webp" alt=""><p class="ppSlogan grande">Hechas en serio,<br>no en serie</p>`;
+    d.innerHTML=`<div class="ppMarca grande"><img src="${base}img/logo.png" alt="Pizzas Plaza"></div><div class="lpp grande"><span class="lppLuna"></span><span>LUNA PLAZA <b>PARK</b></span></div><img class="ppSplashP" src="${base}img/saludando.webp" alt=""><p class="ppSlogan grande">Hechas en serio,<br>no en serie</p>`;
     document.body.appendChild(d); const fuera=()=>{ d.classList.add('fuera'); setTimeout(()=>d.remove(),500); };
     d.addEventListener('pointerdown',fuera); setTimeout(fuera,1800);
   }
