@@ -11,7 +11,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 html,body{margin:0;height:100%;overflow:hidden;font-family:Nunito,system-ui,sans-serif;color:var(--cafe);
   background:radial-gradient(circle at 50% 0%,#FFE9A8 0%,#F7C35F 45%,#C9762B 100%)}
-.pantalla{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;padding:16px}
+.pantalla{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;padding:46px 16px 16px}
 .pantalla.on{display:flex}
 .logoBox{background:#FFF8E7;border-radius:12px;padding:6px 10px;box-shadow:0 4px 0 rgba(66,41,19,.2)}
 .logo{width:56vw;max-width:230px;display:block}
@@ -24,14 +24,14 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:Nunito,system-ui,sans
 .plaz{height:120px;animation:flota 2.4s ease-in-out infinite}
 @keyframes flota{50%{transform:translateY(-8px) rotate(-3deg)}}
 /* juego */
-#juego{justify-content:flex-start;padding-top:12px}
+#juego{justify-content:flex-start;padding-top:44px}
 .hud{width:100%;max-width:460px;display:flex;justify-content:space-between;gap:8px}
 .chip{background:rgba(74,29,110,.9);color:#fff;border-radius:12px;padding:4px 12px;font-weight:900;font-size:17px}
 .host{display:flex;align-items:flex-end;gap:6px;width:100%;max-width:460px;min-height:120px}
 .host img{height:110px;flex:none;transition:transform .2s}
 .globo{background:#fff;border-radius:16px;padding:10px 14px;font-weight:900;font-size:16px;text-align:left;position:relative;flex:1;margin-bottom:40px;box-shadow:0 4px 0 rgba(66,41,19,.15)}
 .globo:before{content:'';position:absolute;left:-10px;bottom:12px;border:10px solid transparent;border-right-color:#fff;border-left:0}
-#mesa{position:relative;width:min(94vw,460px);flex:1;max-height:420px;margin-top:6px}
+#mesa{position:relative;width:min(94vw,460px);flex:1;max-height:420px;margin-top:6px;background:repeating-linear-gradient(45deg,#E8D3B0 0 14px,#F3E4C8 14px 28px);border-radius:24px;box-shadow:inset 0 0 0 6px #C8102E,inset 0 0 0 10px #FCC10C}
 .rosca{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);width:100%;opacity:.95}
 .trozo{position:absolute;top:0;left:0;cursor:pointer;will-change:transform}
 .trozo svg{width:100%;height:auto;display:block;filter:drop-shadow(0 6px 4px rgba(66,41,19,.35))}
@@ -45,10 +45,14 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:Nunito,system-ui,sans
 #mute{position:fixed;bottom:12px;right:12px;z-index:5;background:rgba(74,29,110,.85);border:0;color:#fff;border-radius:50%;width:44px;height:44px;font-size:20px}
 .confeti{position:fixed;top:-20px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:caer linear forwards;z-index:40}
 @keyframes caer{to{transform:translateY(110vh) rotate(720deg)}}
+#papel{position:fixed;left:0;right:0;top:0;height:46px;z-index:1;pointer-events:none;animation:papel 3s ease-in-out infinite;transform-origin:top}
+#papel svg{height:100%;width:auto;min-width:100%}
+@keyframes papel{50%{transform:skewX(1.5deg)}}
 </style>
 <link rel="stylesheet" href="../pp.css">
 </head>
 <body>
+<div id="papel"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 56" preserveAspectRatio="xMinYMin slice"><path d="M0 4 H840" stroke="#7A4A12" stroke-width="2"/><path d="M4 4 H56 V44 L50 52 L44 44 L38 52 L32 44 L26 52 L20 44 L14 52 L8 44 L4 52 Z" fill="#7B2CBF"/><path d="M18 14 l5 8 l5 -8 M32 14 l5 8 l5 -8 M16 30 h28" stroke="#fff6" stroke-width="3" fill="none"/><path d="M64 4 H116 V44 L110 52 L104 44 L98 52 L92 44 L86 52 L80 44 L74 52 L68 44 L64 52 Z" fill="#FCC10C"/><path d="M78 14 l5 8 l5 -8 M92 14 l5 8 l5 -8 M76 30 h28" stroke="#fff6" stroke-width="3" fill="none"/><text x="90" y="40" font-family="Bebas Neue,Impact,sans-serif" font-size="13" fill="#fff" text-anchor="middle">PIZZAS PLAZA</text><path d="M124 4 H176 V44 L170 52 L164 44 L158 52 L152 44 L146 52 L140 44 L134 52 L128 44 L124 52 Z" fill="#C8102E"/><path d="M138 14 l5 8 l5 -8 M152 14 l5 8 l5 -8 M136 30 h28" stroke="#fff6" stroke-width="3" fill="none"/><path d="M184 4 H236 V44 L230 52 L224 44 L218 52 L212 44 L206 52 L200 44 L194 52 L188 44 L184 52 Z" fill="#2E9D4A"/><path d="M198 14 l5 8 l5 -8 M212 14 l5 8 l5 -8 M196 30 h28" stroke="#fff6" stroke-width="3" fill="none"/><path d="M244 4 H296 V44 L290 52 L284 44 L278 52 L272 44 L266 52 L260 44 L254 52 L248 44 L244 52 Z" fill="#F07A1A"/><path d="M258 14 l5 8 l5 -8 M272 14 l5 8 l5 -8 M256 30 h28" stroke="#fff6" stroke-width="3" fill="none"/><path d="M304 4 H356 V44 L350 52 L344 44 L338 52 L332 44 L326 52 L320 44 L314 52 L308 44 L304 52 Z" fill="#7B2CBF"/><path d="M318 14 l5 8 l5 -8 M332 14 l5 8 l5 -8 M316 30 h28" stroke="#fff6" stroke-width="3" fill="none"/><text x="330" y="40" font-family="Bebas Neue,Impact,sans-serif" font-size="13" fill="#fff" text-anchor="middle">PIZZAS PLAZA</text><path d="M364 4 H416 V44 L410 52 L404 44 L398 52 L392 44 L386 52 L380 44 L374 52 L368 44 L364 52 Z" fill="#FCC10C"/><path d="M378 14 l5 8 l5 -8 M392 14 l5 8 l5 -8 M376 30 h28" stroke="#fff6" stroke-width="3" fill="none"/><path d="M424 4 H476 V44 L470 52 L464 44 L458 52 L452 44 L446 52 L440 44 L434 52 L428 44 L424 52 Z" fill="#C8102E"/><path d="M438 14 l5 8 l5 -8 M452 14 l5 8 l5 -8 M436 30 h28" stroke="#fff6" stroke-width="3" fill="none"/><path d="M484 4 H536 V44 L530 52 L524 44 L518 52 L512 44 L506 52 L500 44 L494 52 L488 44 L484 52 Z" fill="#2E9D4A"/><path d="M498 14 l5 8 l5 -8 M512 14 l5 8 l5 -8 M496 30 h28" stroke="#fff6" stroke-width="3" fill="none"/><path d="M544 4 H596 V44 L590 52 L584 44 L578 52 L572 44 L566 52 L560 44 L554 52 L548 44 L544 52 Z" fill="#F07A1A"/><path d="M558 14 l5 8 l5 -8 M572 14 l5 8 l5 -8 M556 30 h28" stroke="#fff6" stroke-width="3" fill="none"/><text x="570" y="40" font-family="Bebas Neue,Impact,sans-serif" font-size="13" fill="#fff" text-anchor="middle">PIZZAS PLAZA</text><path d="M604 4 H656 V44 L650 52 L644 44 L638 52 L632 44 L626 52 L620 44 L614 52 L608 44 L604 52 Z" fill="#7B2CBF"/><path d="M618 14 l5 8 l5 -8 M632 14 l5 8 l5 -8 M616 30 h28" stroke="#fff6" stroke-width="3" fill="none"/><path d="M664 4 H716 V44 L710 52 L704 44 L698 52 L692 44 L686 52 L680 44 L674 52 L668 44 L664 52 Z" fill="#FCC10C"/><path d="M678 14 l5 8 l5 -8 M692 14 l5 8 l5 -8 M676 30 h28" stroke="#fff6" stroke-width="3" fill="none"/><path d="M724 4 H776 V44 L770 52 L764 44 L758 52 L752 44 L746 52 L740 44 L734 52 L728 44 L724 52 Z" fill="#C8102E"/><path d="M738 14 l5 8 l5 -8 M752 14 l5 8 l5 -8 M736 30 h28" stroke="#fff6" stroke-width="3" fill="none"/><path d="M784 4 H836 V44 L830 52 L824 44 L818 52 L812 44 L806 52 L800 44 L794 52 L788 44 L784 52 Z" fill="#2E9D4A"/><path d="M798 14 l5 8 l5 -8 M812 14 l5 8 l5 -8 M796 30 h28" stroke="#fff6" stroke-width="3" fill="none"/><text x="810" y="40" font-family="Bebas Neue,Impact,sans-serif" font-size="13" fill="#fff" text-anchor="middle">PIZZAS PLAZA</text></svg></div>
 
 <section id="inicio" class="pantalla on">
   <div class="logoBox"><img class="logo" data-a="logo" alt="Pizzas Plaza"></div>
