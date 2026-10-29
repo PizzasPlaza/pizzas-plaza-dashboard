@@ -228,7 +228,7 @@ function terminar(msg){ activo=false; SND.pierde(); try{speechSynthesis.cancel()
 function confeti(){ const c=['#D6246E','#FCC10C','#0F8A5F','#2B7BD6','#F07A1A']; for(let i=0;i<70;i++){ const d=document.createElement('div'); d.className='confeti';
   d.style.left=Math.random()*100+'vw'; d.style.background=c[i%5]; d.style.animationDuration=(1.8+Math.random()*1.8)+'s'; d.style.animationDelay=Math.random()*.5+'s'; document.body.appendChild(d); setTimeout(()=>d.remove(),4200);} }
 $('bJugar').onclick=empezar; $('bOtra').onclick=empezar;
-PP.init({protegidos:['bJugar','bOtra'],casa:{bottom:'10px',right:'106px'},clave:'loteria',titulo:'¡LOTERÍA!',mensaje:'¡Buena tabla! Plázido te regala tu descuento.',logo:A.logo,img:A.saludando,alRejugar:empezar});
+PP.init({protegidos:['bJugar','bOtra'],casa:{bottom:'10px',right:'106px'},clave:'loteria',titulo:'¡LOTERÍA!',mensaje:'¡Buena tabla! Plázido te regala un premio sorpresa.',logo:A.logo,img:A.saludando,alRejugar:empezar});
 </script>
 </body>
 </html>

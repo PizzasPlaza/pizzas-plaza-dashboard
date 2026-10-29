@@ -62,8 +62,8 @@ const PP = (()=>{
   <h1 class="ppTit" id="ppTitulo">${cfg.titulo}</h1>
   <p class="ppMsg" id="ppMensaje">${cfg.mensaje||''}</p>
   <div class="ppCup" id="ppCupBox">
-    <div class="ppPct" id="ppPct">${DESCUENTO}%</div>
-    <div class="ppQue" id="ppQue">de descuento en tu <b>próxima visita</b> a Pizzas Plaza</div>
+    <div class="ppPct" id="ppPct"><span class="ppPrem">🎁</span></div>
+    <div class="ppQue" id="ppQue">Tu premio sorpresa</div>
     <div class="ppCod" id="ppCod">· · ·</div>
     <div class="ppVig" id="ppVig"></div>
     <div class="ppVivo" id="ppVivo"><i></i><span id="ppReloj"></span></div>
@@ -109,7 +109,8 @@ const PP = (()=>{
     else if(c.yaTenia && !activo){ $('ppTitulo').textContent='¡Ganaste otra vez!'; $('ppMensaje').textContent=c.proximo&&new Date(c.proximo)>new Date()?`Ya ganaste tu cupón de esta semana. Podrás ganar otro a partir del ${fmt(c.proximo)}.`:'Este es tu último cupón.'; }
   }
   async function ganar(){
-    $('ppTitulo').textContent=cfg.titulo; $('ppMensaje').textContent=cfg.mensaje||''; $('ppCod').textContent='· · ·'; $('ppVig').textContent='Generando tu cupón…';
+    $('ppTitulo').textContent=cfg.titulo; $('ppMensaje').textContent=cfg.mensaje||''; $('ppCod').textContent='· · ·'; $('ppVig').textContent='';
+    $('ppPct').innerHTML='<span class="ppPrem ppGira">🎁</span>'; $('ppQue').innerHTML='Descubriendo tu premio sorpresa…'; $('ppPas').style.display='none';
     $('ppEstado').innerHTML=''; $('ppReintentar').style.display='none'; $('ppCanjear').style.display='none';
     $('ppCupon').classList.add('on'); $('ppCupon').scrollTop=0;
     partida('gano');

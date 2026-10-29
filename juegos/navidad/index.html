@@ -651,7 +651,7 @@ function arrancar(){
 function siguiente(){ nivel++; municion=Math.max(municion,3); arrancar(); }
 function perder(msg){
   estado='fin'; pararMusica(); sfx.pierde(); guardarRecord();
-  $('finTxt').innerHTML=(msg||`¡Plázido se quedó sin vidas en ${N().nom}!`)+`<br><br>Puntos: <b>${puntos}</b>. Llega al Zócalo para ganar tu ${DESCUENTO}% de descuento.`;
+  $('finTxt').innerHTML=(msg||`¡Plázido se quedó sin vidas en ${N().nom}!`)+`<br><br>Puntos: <b>${puntos}</b>. Llega al Zócalo para ganar tu premio sorpresa.`;
   setTimeout(()=>capa('fin'),600);
 }
 function ganarJuego(){

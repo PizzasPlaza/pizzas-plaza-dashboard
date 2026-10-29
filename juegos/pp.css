@@ -90,3 +90,6 @@
 .ppBloq{font-weight:900;font-size:17px;color:#fff;background:#2563EB;border-radius:12px;padding:8px;margin:8px 0}
 
 .ppPrem{display:block;font-size:44px;line-height:1;padding:4px 0}
+
+.ppGira{animation:ppGira .7s ease-in-out infinite}
+@keyframes ppGira{0%,100%{transform:rotate(-12deg) scale(1)}50%{transform:rotate(12deg) scale(1.15)}}

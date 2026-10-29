@@ -145,7 +145,7 @@ function resolver(){
 function terminar(){
   estado='fin'; const rec=PP.record('penales',goles);
   if(goles>=META){ silbato(); SND.gana(); setTimeout(()=>PP.ganar(),600); }
-  else { SND.pierde(); $('finTit').textContent=goles===0?'¡Uff!':'¡Casi!'; $('finTxt').innerHTML=`Metiste <b>${goles} de ${TIROS}</b>. Necesitas ${META} para ganar tu descuento.<br>Tu récord: <b>${rec??goles}</b> goles.`; setTimeout(()=>capa('fin'),400); }
+  else { SND.pierde(); $('finTit').textContent=goles===0?'¡Uff!':'¡Casi!'; $('finTxt').innerHTML=`Metiste <b>${goles} de ${TIROS}</b>. Necesitas ${META} para ganar tu premio sorpresa.<br>Tu récord: <b>${rec??goles}</b> goles.`; setTimeout(()=>capa('fin'),400); }
   $('bReto').href='https://wa.me/?text='+encodeURIComponent(`⚽ Le metí ${goles} de 5 penales al portero Jalapeño en Pizzas Plaza. ¿Me superas? ${URL_JUEGO}`);
 }
 

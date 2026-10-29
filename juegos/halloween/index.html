@@ -414,7 +414,7 @@ function terminar(){
   if(puntos>=META){ sfx.gana(); ponerPose('saludando',99); setTimeout(()=>ganar(),500); }
   else{ sfx.pierde(); ponerPose('pose_3',99);
     $('finTit').textContent=vidas<=0?'¡BUUU!':'¡Se acabó el tiempo!';
-    $('finTxt').textContent=`Hiciste ${puntos} puntos. Necesitas ${META} para ganar tu ${DESCUENTO}% de descuento. ¡Inténtalo otra vez!`;
+    $('finTxt').textContent=`Hiciste ${puntos} puntos. Necesitas ${META} para ganar tu premio sorpresa. ¡Inténtalo otra vez!`;
     setTimeout(()=>capa('fin'),500); }
   pintarRecord();
 }
