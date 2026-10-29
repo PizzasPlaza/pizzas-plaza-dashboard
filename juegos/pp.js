@@ -20,7 +20,8 @@ const PP = (()=>{
   const registrado=()=>!!store.get('pp_tel');
   function htmlRegistro(){ return `
 <div id="ppReg" class="ppCapa">
-  <img class="ppImg" src="${cfg.img||''}" alt="" style="height:96px">
+  <div class="ppMarca"><img src="${base}img/logo.png" alt="Pizzas Plaza"></div>
+  <img class="ppImg" src="${cfg.img||''}" alt="" style="height:84px">
   <h1 class="ppTit">¡Regístrate y juega!</h1>
   <p class="ppMsg">Solo una vez. Si ganas, tu cupón queda ligado a tu celular.</p>
   <form id="ppRegForm" class="ppForm" autocomplete="on">
@@ -31,6 +32,7 @@ const PP = (()=>{
     <div id="ppRegErr" class="ppErr"></div>
     <button class="ppBtn" id="ppRegOk" type="submit">¡LISTO, A JUGAR!</button>
   </form>
+  <p class="ppSlogan">Hechas en serio, no en serie</p>
 </div>`; }
   let alRegistrar=null;
   function pedirRegistro(cb){ alRegistrar=cb; $('ppReg').classList.add('on'); setTimeout(()=>$('ppNom').focus(),100); }
@@ -55,17 +57,19 @@ const PP = (()=>{
   // ---------- cupón ----------
   function htmlCupon(){ return `
 <section id="ppCupon" class="ppCapa">
-  <img class="ppImg" src="${cfg.img||''}" alt="">
+  <div class="ppMarca"><img src="${base}img/logo.png" alt="Pizzas Plaza"></div>
+  <img class="ppImg" src="${cfg.img||''}" alt="" style="height:90px">
   <h1 class="ppTit" id="ppTitulo">${cfg.titulo}</h1>
   <p class="ppMsg" id="ppMensaje">${cfg.mensaje||''}</p>
   <div class="ppCup" id="ppCupBox">
     <div class="ppPct">${DESCUENTO}%</div>
-    <div class="ppQue">de descuento en tu próxima pizza</div>
+    <div class="ppQue">de descuento en tu próxima pizza <b>Pizzas Plaza</b></div>
     <div class="ppCod" id="ppCod">· · ·</div>
     <div class="ppVig" id="ppVig"></div>
     <div class="ppVivo" id="ppVivo"><i></i><span id="ppReloj"></span></div>
     <div id="ppEstado"></div>
     <div class="ppVig" id="ppSuc" style="opacity:.7"></div>
+    <div class="ppSloganCup">Hechas en serio, no en serie</div>
   </div>
   <button class="ppBtn ppVerde" id="ppCanjear">CANJEAR EN CAJA</button>
   <button class="ppBtn ppSec" id="ppReintentar" style="display:none">REINTENTAR</button>
@@ -123,8 +127,20 @@ const PP = (()=>{
       setInterval(()=>{ const r=$('ppReloj'); if(r) r.textContent='Cupón en vivo · '+new Date().toLocaleTimeString('es-MX'); },500);
     }
     proteger(cfg.protegidos);
+    marca();
     addEventListener('hashchange',()=>{ if(location.hash==='#validar') location.href=base+'caja.html'; else sucursal(); });
     return false;
+  }
+  // ---------- marca: pantalla de bienvenida y slogan ----------
+  function marca(){
+    // slogan debajo del primer logo de la pantalla de inicio
+    const l=document.querySelector('.logoBox, img.logo, .logo'); if(l && !document.querySelector('.ppSloganIni')){ const s=document.createElement('p'); s.className='ppSlogan ppSloganIni'; s.textContent='Hechas en serio, no en serie'; (l.closest('.logoBox')||l).after(s); }
+    let visto=false; try{ visto=sessionStorage.getItem('pp_splash')==='1'; sessionStorage.setItem('pp_splash','1'); }catch(e){}
+    if(visto) return;
+    const d=document.createElement('div'); d.id='ppSplash';
+    d.innerHTML=`<div class="ppMarca grande"><img src="${base}img/logo.png" alt="Pizzas Plaza"></div><img class="ppSplashP" src="${base}img/saludando.webp" alt=""><p class="ppSlogan grande">Hechas en serio,<br>no en serie</p>`;
+    document.body.appendChild(d); const fuera=()=>{ d.classList.add('fuera'); setTimeout(()=>d.remove(),500); };
+    d.addEventListener('pointerdown',fuera); setTimeout(fuera,1800);
   }
   function record(clave,valor,mayorEsMejor=true){ const k='pp_'+clave+'_record'; const r=store.get(k); const n=r===null?null:+r;
     if(valor!==undefined && (n===null || (mayorEsMejor?valor>n:valor<n))){ store.set(k,valor); return valor; } return n; }

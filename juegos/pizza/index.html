@@ -222,7 +222,7 @@ function dibujar(){
 function requeridos(){ return ['salsa','queso',...pedido.t]; }
 
 function pintarTicket(){
-  $('tNombre').textContent=pedido.n;
+  $('tNombre').innerHTML='<small style="display:block;font-size:12px;letter-spacing:1px;opacity:.7">PIZZAS PLAZA · ORDEN #'+String(hechas+1).padStart(3,'0')+'</small>'+pedido.n;
   $('tLista').innerHTML=requeridos().map(k=>`<span class="${puestos.includes(k)?'ok':''}">${ING[k].n}</span>`).join('');
   const listo=requeridos().every(k=>puestos.includes(k));
   bHorno.classList.toggle('listo',listo);

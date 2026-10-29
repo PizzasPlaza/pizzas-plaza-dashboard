@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@700;800;900&display=swap");
 /* ===== Pizzas Plaza · estilos comunes del cupón ===== */
 .ppCapa{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;padding:18px;z-index:50;overflow-y:auto;background:var(--ppFondo,#FFF8E7);color:var(--ppTexto,#422913);font-family:Nunito,system-ui,sans-serif}
 .ppCapa.on{display:flex}
@@ -42,3 +43,16 @@
 .ppLink{color:inherit;font-weight:900;font-size:14px;opacity:.75}
 #ppReg{z-index:55}
 .ppBtn:disabled{opacity:.6}
+
+/* marca */
+.ppMarca{background:#FFF8E7;border-radius:12px;padding:5px 10px;box-shadow:0 3px 0 rgba(66,41,19,.15)}
+.ppMarca img{width:46vw;max-width:200px;display:block}
+.ppMarca.grande img{width:70vw;max-width:340px}
+.ppSlogan{font-family:'Bebas Neue',Impact,sans-serif;font-size:22px;letter-spacing:1.5px;margin:2px 0 0;color:inherit;opacity:.9}
+.ppSlogan.grande{font-size:40px;line-height:1;color:#422913;opacity:1}
+.ppSloganCup{font-family:'Bebas Neue',Impact,sans-serif;font-size:18px;letter-spacing:1.5px;color:#62491C;margin-top:8px;border-top:2px dashed #E6D7B5;padding-top:6px}
+#ppSplash{position:fixed;inset:0;z-index:100;background:#FCC10C radial-gradient(circle at 50% 40%,#FFE27A,#FCC10C 60%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .45s;cursor:pointer}
+#ppSplash.fuera{opacity:0;pointer-events:none}
+#ppSplash .ppMarca{animation:ppEntra .6s cubic-bezier(.2,1.4,.5,1)}
+.ppSplashP{height:150px;animation:ppFlota 2s ease-in-out infinite}
+@keyframes ppEntra{from{transform:scale(.6);opacity:0}}
