@@ -69,6 +69,7 @@ const PP = (()=>{
     <div class="ppVivo" id="ppVivo"><i></i><span id="ppReloj"></span></div>
     <div id="ppEstado"></div>
     <div class="ppVig" id="ppSuc" style="opacity:.7"></div>
+    <div class="ppPas" id="ppPas" style="display:none"><canvas id="ppPasCv"></canvas><div class="ppPasTxt" id="ppPasTxt"></div></div>
     <div class="ppSloganCup">Ganado en Luna Plaza Park · Hechas en serio, no en serie</div>
   </div>
   <div class="ppComo" id="ppComo">
@@ -78,7 +79,7 @@ const PP = (()=>{
   <a class="ppBtn ppWa" id="ppWa" target="_blank" rel="noopener">📲 GUARDARLO EN MI WHATSAPP</a>
   <button class="ppBtn ppVerde" id="ppCanjear">CANJEAR EN CAJA</button>
   <button class="ppBtn ppSec" id="ppReintentar" style="display:none">REINTENTAR</button>
-  <p class="ppLegal">Válido en tu siguiente visita en sucursales Pizzas Plaza participantes, no en la cuenta del día en que lo ganaste. Un cupón por cliente, no acumulable con otras promociones.</p>
+  <p class="ppLegal">Válido en tu siguiente visita en sucursales Pizzas Plaza participantes, no en la cuenta del día en que lo ganaste. Un cupón por cliente por semana, no acumulable con otras promociones. Cada cupón canjeado suma una rebanada a tu Pasaporte Plázido.</p>
   <button class="ppBtn ppSec" id="ppRejugar">JUGAR OTRA VEZ</button>
   ${cfg.portal!==false?`<a class="ppLink" href="${base}index.html">🌙 Regresar a Luna Plaza Park</a>`:''}
 </section>
@@ -92,18 +93,20 @@ const PP = (()=>{
   let actual=null;
   function pintar(c){
     actual=c; const usado=c.estado==='CANJEADO', vencido=c.estado==='VENCIDO'||(c.estado==='ACTIVO'&&new Date(c.vence)<new Date());
-    $('ppCod').textContent=c.codigo; $('ppVig').textContent=(vencido?'Venció el ':'Válido hasta el ')+fmt(c.vence);
-    $('ppEstado').innerHTML=usado?`<div class="ppCanjeado">✓ CANJEADO</div><div class="ppVig">${c.canjeado||''}</div>`:vencido?'<div class="ppCanjeado" style="background:#92400E">VENCIDO</div>':'';
+    const bloqueado=!usado&&!vencido&&c.desde&&new Date(c.desde)>new Date();
+    $('ppCod').textContent=c.codigo; $('ppVig').innerHTML=vencido?'Venció el '+fmt(c.vence):c.desde?`Úsalo del <b>${fmt(c.desde)}</b> al <b>${fmt(c.vence)}</b>`:'Válido hasta el '+fmt(c.vence);
+    $('ppEstado').innerHTML=usado?`<div class="ppCanjeado">✓ CANJEADO</div><div class="ppVig">${c.canjeado||''}</div>`:vencido?'<div class="ppCanjeado" style="background:#92400E">VENCIDO</div>':bloqueado?`<div class="ppBloq">🔒 Se activa el ${fmt(c.desde)}</div>`:'';
     const activo=!usado&&!vencido;
+    pintarPas(c.pasaporte,false);
     const urlPortal=new URL(base+'index.html',location.href).href;
-    $('ppWa').href='https://wa.me/?text='+encodeURIComponent(`🍕 Mi cupón de Pizzas Plaza: *${c.codigo}*\n${DESCUENTO}% de descuento en mi próxima visita. Válido hasta el ${fmt(c.vence)}.\nEn caja doy mi celular o lo abro aquí: ${urlPortal}`);
+    $('ppWa').href='https://wa.me/?text='+encodeURIComponent(`🍕 Mi cupón de Pizzas Plaza: *${c.codigo}*\n${DESCUENTO}% de descuento en mi próxima visita.\nLo puedo usar del ${c.desde?fmt(c.desde):'día de hoy'} al ${fmt(c.vence)}.\nEn caja doy mi celular o lo abro aquí: ${urlPortal}`);
     $('ppWa').style.display=activo?'':'none'; $('ppComo').style.display=activo?'':'none';
-    $('ppCanjear').style.display=activo?'':'none'; $('ppVivo').style.display=activo?'':'none';
+    $('ppCanjear').style.display=activo&&!bloqueado?'':'none'; $('ppVivo').style.display=activo?'':'none';
     $('ppCod').style.textDecoration=activo?'':'line-through'; $('ppCod').style.opacity=activo?'':'.5';
     $('ppCupBox').classList.toggle('anim',activo);
     const s=sucursal(); $('ppSuc').textContent=s?'Sucursal: '+capital(s):'';
     if(c.yaTenia && activo){ $('ppTitulo').textContent='¡Ya tienes un cupón!'; $('ppMensaje').textContent='Tu cupón activo es este. ¡Úsalo en tu próxima visita!'; }
-    else if(c.yaTenia && !activo){ $('ppTitulo').textContent='¡Ganaste otra vez!'; $('ppMensaje').textContent=c.proximo?`Ya usaste tu cupón de este mes. Podrás ganar otro a partir del ${fmt(c.proximo)}.`:'Ya usaste tu cupón.'; }
+    else if(c.yaTenia && !activo){ $('ppTitulo').textContent='¡Ganaste otra vez!'; $('ppMensaje').textContent=c.proximo&&new Date(c.proximo)>new Date()?`Ya ganaste tu cupón de esta semana. Podrás ganar otro a partir del ${fmt(c.proximo)}.`:'Este es tu último cupón.'; }
   }
   async function ganar(){
     $('ppTitulo').textContent=cfg.titulo; $('ppMensaje').textContent=cfg.mensaje||''; $('ppCod').textContent='· · ·'; $('ppVig').textContent='Generando tu cupón…';
@@ -113,6 +116,10 @@ const PP = (()=>{
     try{ const r=await api({accion:'cupon',tel:store.get('pp_tel')||'',juego:cfg.clave,suc:sucursal()}); if(!r.ok) throw new Error(r.error); pintar(r); }
     catch(e){ $('ppCod').textContent='SIN CONEXIÓN'; $('ppVig').textContent='No pudimos generar tu cupón. Revisa tu internet y toca Reintentar.'; $('ppReintentar').style.display=''; }
   }
+  // ---------- pasaporte (8 rebanadas = pizza mediana gratis) ----------
+  function pintarPas(ps,animar){ const box=$('ppPas'); if(!box) return; if(!ps||typeof PASAPORTE==='undefined'){ box.style.display='none'; return; }
+    box.style.display=''; PASAPORTE.pintar($('ppPasCv'),ps.rebanadas,base,animar);
+    $('ppPasTxt').innerHTML=ps.pizzasListas>0?'🎉 <b>¡Completaste tu pizza!</b> Pide tu <b>pizza mediana gratis</b> en caja.':`<b>${ps.rebanadas} de 8 rebanadas.</b> Cada cupón que canjeas colorea una. Con 8, ¡pizza mediana gratis!`; }
   // ---------- recuperar el cupón en otra visita ----------
   async function miCupon(mostrar=true){
     const tel=store.get('pp_tel'); if(!tel) return null;
@@ -134,7 +141,7 @@ const PP = (()=>{
       $('ppPinNo').onclick=()=>$('ppModal').classList.remove('on');
       $('ppPinOk').onclick=async()=>{ $('ppPinOk').disabled=true; $('ppPinErr').textContent='Verificando…';
         try{ const r=await api({accion:'canjear',codigo:actual.codigo,pin:$('ppPin').value,suc:sucursal()});
-          if(!r.ok){ $('ppPinErr').textContent=r.error; } else { actual.estado='CANJEADO'; actual.canjeado=r.canjeado+(r.sucursal?' · '+r.sucursal:''); $('ppModal').classList.remove('on'); pintar(actual); }
+          if(!r.ok){ $('ppPinErr').textContent=r.error; } else { actual.estado='CANJEADO'; actual.canjeado=r.canjeado+(r.sucursal?' · '+r.sucursal:''); actual.pasaporte=r.pasaporte; $('ppModal').classList.remove('on'); pintar(actual); pintarPas(r.pasaporte,true); }
         }catch(e){ $('ppPinErr').textContent='Sin conexión. Intenta otra vez.'; }
         $('ppPinOk').disabled=false; };
       $('ppReintentar').onclick=ganar;
@@ -179,7 +186,7 @@ const PP = (()=>{
   }
   function record(clave,valor,mayorEsMejor=true){ const k='pp_'+clave+'_record'; const r=store.get(k); const n=r===null?null:+r;
     if(valor!==undefined && (n===null || (mayorEsMejor?valor>n:valor<n))){ store.set(k,valor); return valor; } return n; }
-  return {init,ganar,miCupon,partida,record,store,api,antesDeJugar,proteger,registrado,cambiarNumero,sucursal,DESCUENTO};
+  return {init,ganar,miCupon,partida,pintarPas,record,store,api,antesDeJugar,proteger,registrado,cambiarNumero,sucursal,DESCUENTO};
 })();
 
 // ===== Audio sintetizado compartido =====

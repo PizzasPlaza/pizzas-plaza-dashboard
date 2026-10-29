@@ -22,6 +22,9 @@ button:disabled{opacity:.5}
 .estado{font-family:'Bebas Neue',Impact,sans-serif;font-size:40px;text-align:center;border-radius:12px;color:#fff;padding:4px}
 .ACTIVO{background:#16A34A}.CANJEADO{background:#B91C1C}.VENCIDO{background:#92400E}.NOEXISTE{background:#555}
 .datos{font-weight:800;font-size:15px;line-height:1.6}
+.TODAVÍA{background:#2563EB}
+.pas{display:flex;gap:12px;align-items:center;border-top:2px dashed #E6D7B5;padding-top:10px}.pas canvas{width:110px;flex:none}.pas div{font-weight:800;font-size:14px}
+.premio{display:none;background:#FFF3C4;border:3px solid #FCC10C;border-radius:14px;padding:10px;text-align:center;font-weight:900}
 .msg{font-weight:900;text-align:center;min-height:22px}
 small{opacity:.7;font-weight:700;text-align:center}
 </style>
@@ -42,32 +45,43 @@ small{opacity:.7;font-weight:700;text-align:center}
     <button class="verde" id="bCanjear" style="width:100%;margin-top:8px">APLICAR DESCUENTO Y CANJEAR</button>
   </div>
   <div class="msg" id="msg2"></div>
+  <div class="pas" id="pas" style="display:none"><canvas id="pasCv"></canvas><div id="pasTxt"></div></div>
+  <div class="premio" id="premio">🍕 ¡A ESTE CLIENTE LE TOCA UNA PIZZA MEDIANA GRATIS!<br><span style="font-weight:700;font-size:13px">Usa el mismo PIN de arriba.</span><br>
+    <button class="verde" id="bPremio" style="width:100%;margin-top:8px">ENTREGAR PIZZA GRATIS</button></div>
 </div>
 <small>Cada cupón se puede canjear una sola vez en cualquier sucursal. Registra el código también en el ticket del POS.</small>
 <script src="config.js"></script>
+<script src="pasaporte.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 const st={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
 async function api(p){ const r=await fetch(PP_API+'?'+new URLSearchParams(p),{redirect:'follow'}); return r.json(); }
 $('cod').addEventListener('input',e=>{ let raw=e.target.value.toUpperCase(); if(/^[\d\s]+$/.test(raw)) { e.target.value=raw.replace(/\D/g,'').slice(0,10); return; } let v=raw.replace(/[^A-Z0-9]/g,''); if(v.startsWith('PP')) v=v.slice(2); v=v.slice(0,7); e.target.value=v?'PP-'+v.slice(0,3)+(v.length>3?'-'+v.slice(3):''):''; });
-let codigo='';
+let codigo='', telCli='';
+function verPas(ps,animar){ if(!ps){ $('pas').style.display='none'; $('premio').style.display='none'; return; } $('pas').style.display='flex'; PASAPORTE.pintar($('pasCv'),ps.rebanadas,'./',animar);
+  $('pasTxt').innerHTML=`Pasaporte: <b>${ps.rebanadas} de 8</b> rebanadas<br><span style="font-weight:700;opacity:.75">${ps.total} cupones canjeados en total</span>`; $('premio').style.display=ps.pizzasListas>0?'block':'none'; }
+$('bPremio').onclick=async()=>{ if(!telCli) return; $('bPremio').disabled=true; $('msg2').textContent='Registrando…';
+  try{ const r=await api({accion:'premio',tel:telCli,pin:$('pin').value}); if(r.ok){ $('msg2').textContent='✅ Pizza mediana gratis entregada en '+r.sucursal+'. El pasaporte vuelve a empezar.'; verPas(r.pasaporte,false); } else $('msg2').textContent=r.error; }
+  catch(e){ $('msg2').textContent='Sin conexión. Intenta otra vez.'; } $('bPremio').disabled=false; };
 $('bVal').onclick=async()=>{
   const val=$('cod').value.trim().toUpperCase(); const esTel=/^\d{10}$/.test(val);
   if(!esTel && val.length<11){ $('msg').textContent='Escribe el código completo o los 10 dígitos del celular.'; return; }
   $('msg').textContent='Consultando…'; $('bVal').disabled=true; $('res').style.display='none';
-  try{ const r=await api(esTel?{accion:'validar',tel:val}:{accion:'validar',codigo:val}); $('msg').textContent=''; codigo=r.codigo||val;
+  try{ const r=await api(esTel?{accion:'validar',tel:val}:{accion:'validar',codigo:val}); $('msg').textContent=''; codigo=r.codigo||val; telCli=r.telCompleto||(esTel?val:''); verPas(r.pasaporte,false);
+    $('zonaCanje').style.display='';
     $('res').style.display='flex'; $('msg2').textContent='';
-    if(!r.existe){ $('estado').className='estado NOEXISTE'; $('estado').textContent='NO EXISTE'; $('datos').textContent=esTel?'Este celular no tiene cupones. No aplicar descuento.':'Este código no está en el sistema. No aplicar descuento.'; $('zonaCanje').style.display='none'; }
+    if(!r.existe){ $('estado').className='estado NOEXISTE'; $('estado').textContent='NO EXISTE'; $('datos').textContent=esTel?'Este celular no tiene cupones. No aplicar descuento.':'Este código no está en el sistema. No aplicar descuento.'; $('zonaCanje').style.display=(r.pasaporte&&r.pasaporte.pizzasListas>0)?'':'none'; $('bCanjear').style.display='none'; }
     else { $('estado').className='estado '+r.estado; $('estado').textContent=r.estado==='ACTIVO'?'✓ VÁLIDO':r.estado;
-      $('datos').innerHTML=`Código: <b>${r.codigo}</b><br>Cliente: <b>${r.nombre||'—'}</b> (${r.tel})${esTel?' — <b>pregúntale su nombre para confirmar</b>':''}<br>Juego: ${r.juego}<br>Emitido: ${r.emitido}<br>Vence: ${r.vence}`+(r.canjeado?`<br><b>Canjeado: ${r.canjeado}${r.sucCanje?' en '+r.sucCanje:''}</b>`:'')+`<br>Descuento: <b>${r.descuento}%</b>`;
-      $('zonaCanje').style.display=r.estado==='ACTIVO'?'':'none'; }
+      if(r.estado==='TODAVÍA NO') r.estado='TODAVÍA'; $('estado').className='estado '+r.estado; $('estado').textContent=r.estado==='ACTIVO'?'✓ VÁLIDO':r.estado==='TODAVÍA'?'🔒 TODAVÍA NO':r.estado;
+      $('datos').innerHTML=`${r.estado==='TODAVÍA'?'<b>Este cupón se puede usar a partir del '+r.desde+'.</b> No aplicar descuento hoy.<br>':''}Código: <b>${r.codigo}</b><br>Cliente: <b>${r.nombre||'—'}</b> (${r.tel})${esTel?' — <b>pregúntale su nombre para confirmar</b>':''}<br>Juego: ${r.juego}<br>Emitido: ${r.emitido}<br>Vence: ${r.vence}`+(r.canjeado?`<br><b>Canjeado: ${r.canjeado}${r.sucCanje?' en '+r.sucCanje:''}</b>`:'')+`<br>Descuento: <b>${r.descuento}%</b>`;
+      const premio=r.pasaporte&&r.pasaporte.pizzasListas>0; $('zonaCanje').style.display=(r.estado==='ACTIVO'||premio)?'':'none'; $('bCanjear').style.display=r.estado==='ACTIVO'?'':'none'; }
   }catch(e){ $('msg').textContent='Sin conexión. Intenta otra vez.'; }
   $('bVal').disabled=false;
 };
 $('bCanjear').onclick=async()=>{
   $('bCanjear').disabled=true; $('msg2').textContent='Canjeando…';
   try{ const r=await api({accion:'canjear',codigo,pin:$('pin').value});
-    if(r.ok){ $('estado').className='estado CANJEADO'; $('estado').textContent='CANJEADO ✓'; $('zonaCanje').style.display='none'; $('msg2').textContent=`Listo: aplica el ${r.descuento}% de descuento. Canjeado el ${r.canjeado} en ${r.sucursal}.`; }
+    if(r.ok){ $('estado').className='estado CANJEADO'; $('estado').textContent='CANJEADO ✓'; $('bCanjear').style.display='none'; $('msg2').textContent=`Listo: aplica el ${r.descuento}% de descuento. Canjeado el ${r.canjeado} en ${r.sucursal}. +1 rebanada 🍕`; verPas(r.pasaporte,true); }
     else $('msg2').textContent=r.error;
   }catch(e){ $('msg2').textContent='Sin conexión. Intenta otra vez.'; }
   $('bCanjear').disabled=false;

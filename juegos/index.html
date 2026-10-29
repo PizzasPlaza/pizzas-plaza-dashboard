@@ -33,7 +33,8 @@ main{max-width:480px;margin:-40px auto 0;padding:0 14px 30px;position:relative}
 footer{text-align:center;font-size:12px;opacity:.6;font-weight:700;padding:0 20px 30px;max-width:480px;margin:0 auto}
 </style>
 <link rel="stylesheet" href="pp.css">
-<style>.hola{background:#fff;border-radius:14px;padding:10px 14px;font-weight:900;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:8px;box-shadow:0 4px 0 rgba(66,41,19,.1)}.miCup{background:#16A34A;color:#fff;border-radius:14px;padding:10px 14px;font-weight:900;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:8px;box-shadow:0 4px 0 #0E6B30}.miCup button{background:#fff;color:#16A34A;border:0;border-radius:10px;padding:8px 10px;font-weight:900;font-family:Nunito;font-size:14px;white-space:nowrap}
+<style>.hola{background:#fff;border-radius:14px;padding:10px 14px;font-weight:900;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:8px;box-shadow:0 4px 0 rgba(66,41,19,.1)}.pasa{background:#fff;border-radius:16px;padding:12px;margin-bottom:18px;display:flex;gap:12px;align-items:center;box-shadow:0 4px 0 rgba(66,41,19,.1)}.pasa canvas{width:120px;flex:none}.pasa div{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:800}.pasaTit{font-family:'Bebas Neue',Impact,sans-serif;font-size:24px;font-weight:400;letter-spacing:1px}
+.miCup{background:#16A34A;color:#fff;border-radius:14px;padding:10px 14px;font-weight:900;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:8px;box-shadow:0 4px 0 #0E6B30}.miCup button{background:#fff;color:#16A34A;border:0;border-radius:10px;padding:8px 10px;font-weight:900;font-family:Nunito;font-size:14px;white-space:nowrap}
 .hola button{background:none;border:0;color:#C8102E;font-weight:900;font-family:Nunito;font-size:14px;text-decoration:underline}</style>
 <style>main.cargando .card{display:none}.sinJuegos{text-align:center;font-weight:900;padding:30px 10px;opacity:.7}</style>
 </head>
@@ -47,6 +48,7 @@ footer{text-align:center;font-size:12px;opacity:.6;font-weight:700;padding:0 20p
 </header>
 <main class="cargando" id="lista">
   <div class="hola" id="hola" style="display:none"><span id="holaTxt"></span><span style="display:flex;gap:10px;align-items:center"><button id="bMiCupon2" style="background:#16A34A;color:#fff;border-radius:10px;padding:7px 10px;text-decoration:none">🎟️ Mi cupón</button><button id="bCambiar">Cambiar número</button></span></div>
+  <div class="pasa" id="pasa" style="display:none"><canvas id="pasaCv"></canvas><div><b class="pasaTit">🍕 Tu Pasaporte Plázido</b><span id="pasaTxt"></span></div></div>
   <div class="miCup" id="miCup" style="display:none"><span id="miCupTxt"></span><button id="bMiCupon">🎟️ VER MI CUPÓN</button></div>
   <div class="premio"><b>15% DE DESCUENTO</b>en tu próxima pizza si ganas</div>
 
@@ -102,6 +104,7 @@ footer{text-align:center;font-size:12px;opacity:.6;font-weight:700;padding:0 20p
 </main>
 <footer>Un cupón por cliente. Muestra tu cupón en caja en sucursales Pizzas Plaza participantes. No acumulable con otras promociones.</footer>
 <script src="config.js"></script>
+<script src="pasaporte.js"></script>
 <script src="pp.js"></script>
 <script>
 PP.init({clave:'portal',base:'./',esPortal:true,titulo:'🎟️ Tu cupón',img:'img/saludando.webp',alRejugar:()=>{}});
@@ -115,8 +118,11 @@ document.getElementById('bMiCupon').onclick=()=>PP.miCupon(true);
 document.getElementById('bMiCupon2').onclick=async()=>{ const t=document.getElementById('holaTxt'), antes=t.textContent; t.textContent='Buscando tu cupón…';
   const r=await PP.miCupon(true); if(!r||r.ok===false){ t.textContent='No se pudo consultar. Intenta en un momento.'; } else if(!r.existe){ t.textContent='Aún no tienes cupón. ¡Gana uno jugando!'; } else t.textContent=antes;
   setTimeout(hola,3000); };
-async function revisarCupon(){ const r=await PP.miCupon(false); const b=document.getElementById('miCup');
-  if(r&&r.existe&&r.estado==='ACTIVO'){ b.style.display='flex'; document.getElementById('miCupTxt').textContent=`🎉 Tienes ${r.descuento}% de descuento hasta el ${new Date(r.vence).toLocaleDateString('es-MX',{day:'numeric',month:'long'})}`; } else b.style.display='none'; }
+async function revisarCupon(){ const r=await PP.miCupon(false); const b=document.getElementById('miCup'); const fm=d=>new Date(d).toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
+  if(r&&r.existe&&r.estado==='ACTIVO'){ b.style.display='flex'; const bloq=r.desde&&new Date(r.desde)>new Date();
+    document.getElementById('miCupTxt').textContent=bloq?`🔒 Tu ${r.descuento}% se activa el ${fm(r.desde)}`:`🎉 Tienes ${r.descuento}% de descuento hasta el ${fm(r.vence)}`; } else b.style.display='none';
+  const ps=r&&r.pasaporte; if(ps){ document.getElementById('pasa').style.display='flex'; PASAPORTE.pintar(document.getElementById('pasaCv'),ps.rebanadas,'./',false);
+    document.getElementById('pasaTxt').innerHTML=ps.pizzasListas>0?'🎉 <b>¡Completaste tu pizza!</b> Pide tu pizza mediana gratis en caja.':`<b>${ps.rebanadas} de 8 rebanadas.</b> Cada cupón que canjeas colorea una rebanada. Con las 8: <b>¡pizza mediana gratis!</b>`; } }
 revisarCupon();
 // ---- qué juegos se ven y en qué orden (hoja "Juegos" de la Google Sheet) ----
 (async()=>{ const main=document.getElementById('lista'); const fin=()=>main.classList.remove('cargando');
