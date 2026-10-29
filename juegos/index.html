@@ -35,6 +35,7 @@ footer{text-align:center;font-size:12px;opacity:.6;font-weight:700;padding:0 20p
 <link rel="stylesheet" href="pp.css">
 <style>.hola{background:#fff;border-radius:14px;padding:10px 14px;font-weight:900;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:8px;box-shadow:0 4px 0 rgba(66,41,19,.1)}.miCup{background:#16A34A;color:#fff;border-radius:14px;padding:10px 14px;font-weight:900;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:8px;box-shadow:0 4px 0 #0E6B30}.miCup button{background:#fff;color:#16A34A;border:0;border-radius:10px;padding:8px 10px;font-weight:900;font-family:Nunito;font-size:14px;white-space:nowrap}
 .hola button{background:none;border:0;color:#C8102E;font-weight:900;font-family:Nunito;font-size:14px;text-decoration:underline}</style>
+<style>main.cargando .card{display:none}.sinJuegos{text-align:center;font-weight:900;padding:30px 10px;opacity:.7}</style>
 </head>
 <body>
 <header>
@@ -44,52 +45,52 @@ footer{text-align:center;font-size:12px;opacity:.6;font-weight:700;padding:0 20p
   <img class="plaz izq" src="img/saludando.webp" alt="">
   <img class="plaz der" src="img/feliz.webp" alt="">
 </header>
-<main>
+<main class="cargando" id="lista">
   <div class="hola" id="hola" style="display:none"><span id="holaTxt"></span><span style="display:flex;gap:10px;align-items:center"><button id="bMiCupon2" style="background:#16A34A;color:#fff;border-radius:10px;padding:7px 10px;text-decoration:none">🎟️ Mi cupón</button><button id="bCambiar">Cambiar número</button></span></div>
   <div class="miCup" id="miCup" style="display:none"><span id="miCupTxt"></span><button id="bMiCupon">🎟️ VER MI CUPÓN</button></div>
   <div class="premio"><b>15% DE DESCUENTO</b>en tu próxima pizza si ganas</div>
 
-  <a class="card" data-href="pizza-en-bloques/">
+  <a class="card" data-juego="pizza-en-bloques" data-href="pizza-en-bloques/">
     <div class="foto" style="background:#6B2F17"><img src="img/t_bloques.webp" alt="" style="object-position:center 70%"><span class="tag" style="background:#C8102E">🧩 NUEVO</span></div>
     <div class="info"><div class="t"><h2>Pizza en Bloques</h2><p>Acomoda los bloques de ingredientes en la caja y hornea pizzas completas.</p><div class="dif">⏱ 3 min · Dificultad ●●○</div></div><span class="jugar" style="background:#C8102E">JUGAR</span></div>
   </a>
 
-  <a class="card" data-href="cocina-de-plazido/">
+  <a class="card" data-juego="cocina-de-plazido" data-href="cocina-de-plazido/">
     <div class="foto" style="background:#2A1A0C"><img src="img/t_placi.webp" alt="" style="object-position:center 40%"><span class="tag" style="background:#C8102E">🌶️ LABERINTO</span></div>
     <div class="info"><div class="t"><h2>La Cocina de Plázido</h2><p>Las moscas invadieron la cocina. Recoge todas las migajas y usa el chile para espantarlas.</p><div class="dif">⏱ 2 min · Dificultad ●●●</div></div><span class="jugar" style="background:#C8102E">JUGAR</span></div>
   </a>
 
-  <a class="card" data-href="halloween/">
+  <a class="card" data-juego="halloween" data-href="halloween/">
     <div class="foto" style="background:#2A1240"><img src="img/t_hw.webp" alt=""><span class="tag" style="background:#FF7A1A">🎃 HALLOWEEN</span></div>
     <div class="info"><div class="t"><h2>La Cocina Embrujada</h2><p>Atrapa a los amigos de Plázido y esquiva fantasmas, murciélagos y calabazas.</p><div class="dif">⏱ 45 seg · Dificultad ●●○</div></div><span class="jugar" style="background:#FF7A1A">JUGAR</span></div>
   </a>
 
-  <a class="card" data-href="navidad/">
+  <a class="card" data-juego="navidad" data-href="navidad/">
     <div class="foto" style="background:#0B1838"><img src="img/t_nav.webp" alt=""><span class="tag" style="background:#C8102E">🎄 NAVIDAD</span></div>
     <div class="info"><div class="t"><h2>La Gran Entrega Navideña</h2><p>Salta de azotea en azotea y entrega las pizzas de Nochebuena hasta el Zócalo.</p><div class="dif">⏱ 2 min · Dificultad ●●●</div></div><span class="jugar" style="background:#0F7B3E">JUGAR</span></div>
   </a>
 
-  <a class="card" data-href="rosca/">
+  <a class="card" data-juego="rosca" data-href="rosca/">
     <div class="foto" style="background:#F7C35F"><img src="img/t_rosca.webp" alt="" style="object-position:center 60%"><span class="tag" style="background:#7B2CBF">👑 ROSCA DE REYES</span></div>
     <div class="info"><div class="t"><h2>¿Dónde está el muñeco?</h2><p>Plázido esconde el muñeco en la rosca. Síguelo con la vista mientras revuelve los trozos.</p><div class="dif">⏱ 1 min · Dificultad ●●○</div></div><span class="jugar" style="background:#7B2CBF">JUGAR</span></div>
   </a>
 
-  <a class="card" data-href="loteria/">
+  <a class="card" data-juego="loteria" data-href="loteria/">
     <div class="foto" style="background:#FFF3DC"><img src="img/t_lot.webp" alt="" style="object-position:center 30%"><span class="tag" style="background:#D6246E">🎴 LOTERÍA</span></div>
     <div class="info"><div class="t"><h2>Lotería Plázido</h2><p>Plázido canta las cartas. Pon tus frijolitos y grita ¡Lotería! antes de la carta 20.</p><div class="dif">⏱ 1 min · Dificultad ●●○</div></div><span class="jugar" style="background:#D6246E">JUGAR</span></div>
   </a>
 
-  <a class="card" data-href="penales/">
+  <a class="card" data-juego="penales" data-href="penales/">
     <div class="foto" style="background:#1F8A3B"><img src="img/t_pen.webp" alt="" style="object-position:center 35%"><span class="tag" style="background:#0F7B3E">⚽ PENALES</span></div>
     <div class="info"><div class="t"><h2>Penales con Plázido</h2><p>Jalapeño se cree el mejor portero. Desliza el dedo y métele 3 de 5.</p><div class="dif">⏱ 1 min · Dificultad ●●○</div></div><span class="jugar" style="background:#0F7B3E">JUGAR</span></div>
   </a>
 
-  <a class="card" data-href="memorama/">
+  <a class="card" data-juego="memorama" data-href="memorama/">
     <div class="foto" style="background:#FFF8E7"><img src="img/t_mem.webp" alt="" style="object-position:center 40%"><span class="tag" style="background:#E4572E">🧠 MEMORAMA</span></div>
     <div class="info"><div class="t"><h2>Memorama Plázido</h2><p>Encuentra las parejas de los amigos de Plázido y de nuestras pizzas.</p><div class="dif">⏱ 2 min · Dificultad ●○○</div></div><span class="jugar" style="background:#E4572E">JUGAR</span></div>
   </a>
 
-  <a class="card" data-href="pizza/">
+  <a class="card" data-juego="pizza" data-href="pizza/">
     <div class="foto" style="background:#FFF8E7"><img src="img/t_pizza.webp" alt="" style="object-fit:contain"><span class="tag" style="background:#62491C">🍕 CLÁSICO</span></div>
     <div class="info"><div class="t"><h2>Arma tu Pizza</h2><p>Sigue los pedidos, pon los ingredientes en orden y mete las pizzas al horno.</p><div class="dif">⏱ 60 seg · Dificultad ●○○</div></div><span class="jugar" style="background:#62491C">JUGAR</span></div>
   </a>
@@ -112,6 +113,15 @@ document.getElementById('bMiCupon2').onclick=async()=>{ const t=document.getElem
 async function revisarCupon(){ const r=await PP.miCupon(false); const b=document.getElementById('miCup');
   if(r&&r.existe&&r.estado==='ACTIVO'){ b.style.display='flex'; document.getElementById('miCupTxt').textContent=`🎉 Tienes ${r.descuento}% de descuento hasta el ${new Date(r.vence).toLocaleDateString('es-MX',{day:'numeric',month:'long'})}`; } else b.style.display='none'; }
 revisarCupon();
+// ---- qué juegos se ven y en qué orden (hoja "Juegos" de la Google Sheet) ----
+(async()=>{ const main=document.getElementById('lista'); const fin=()=>main.classList.remove('cargando');
+  const t=setTimeout(fin,4000); // si la Sheet no responde, se muestran todos
+  try{ const r=await PP.api({accion:'juegos'}); if(r.ok&&Array.isArray(r.juegos)){ clearTimeout(t);
+      const cards=[...document.querySelectorAll('.card[data-juego]')], ancla=cards.length?cards[0].previousElementSibling:null;
+      cards.forEach(c=>{ if(!r.juegos.includes(c.dataset.juego)) c.remove(); });
+      r.juegos.slice().reverse().forEach(j=>{ const c=document.querySelector(`.card[data-juego="${j}"]`); if(c&&ancla) ancla.after(c); });
+      if(!document.querySelector('.card')) ancla&&ancla.insertAdjacentHTML('afterend','<p class="sinJuegos">Muy pronto nuevos juegos 🎮</p>'); } }catch(e){}
+  fin(); })();
 </script>
 </body>
 </html>

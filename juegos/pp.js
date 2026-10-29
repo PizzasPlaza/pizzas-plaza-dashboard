@@ -145,6 +145,10 @@ const PP = (()=>{
     proteger(cfg.protegidos);
     marca();
     if(!cfg.sinCupon && !cfg.esPortal) botonCasa(cfg.casa||{bottom:'12px',right:'64px'});
+    if(!cfg.esPortal && !cfg.sinCupon) api({accion:'juegos'}).then(r=>{ if(r&&r.ok&&Array.isArray(r.juegos)&&!r.juegos.includes(cfg.clave)){
+      const d=document.createElement('div'); d.className='ppCapa on'; d.style.zIndex=120;
+      d.innerHTML=`<img class="ppImg" src="${base}img/pose_3.webp" alt=""><h1 class="ppTit">Este juego descansa por hoy</h1><p class="ppMsg">Pero hay otros esperándote en Luna Plaza Park.</p><a class="ppBtn" href="${base}index.html" style="text-decoration:none">🌙 IR A LUNA PLAZA PARK</a>`;
+      document.body.appendChild(d); } }).catch(()=>{});
     addEventListener('hashchange',()=>{ if(location.hash==='#validar') location.href=base+'caja.html'; else sucursal(); });
     return false;
   }
