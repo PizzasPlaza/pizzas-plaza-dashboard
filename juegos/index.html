@@ -45,7 +45,7 @@ footer{text-align:center;font-size:12px;opacity:.6;font-weight:700;padding:0 20p
   <img class="plaz der" src="img/feliz.webp" alt="">
 </header>
 <main>
-  <div class="hola" id="hola" style="display:none"><span id="holaTxt"></span><button id="bCambiar">Cambiar número</button></div>
+  <div class="hola" id="hola" style="display:none"><span id="holaTxt"></span><span style="display:flex;gap:10px;align-items:center"><button id="bMiCupon2" style="background:#16A34A;color:#fff;border-radius:10px;padding:7px 10px;text-decoration:none">🎟️ Mi cupón</button><button id="bCambiar">Cambiar número</button></span></div>
   <div class="miCup" id="miCup" style="display:none"><span id="miCupTxt"></span><button id="bMiCupon">🎟️ VER MI CUPÓN</button></div>
   <div class="premio"><b>15% DE DESCUENTO</b>en tu próxima pizza si ganas</div>
 
@@ -106,6 +106,9 @@ document.querySelectorAll('.card').forEach(a=>{ a.href=a.dataset.href+suc;
   a.addEventListener('click',e=>{ if(PP.registrado()) return; e.preventDefault(); PP.antesDeJugar(()=>{ hola(); location.href=a.href; }); }); });
 hola(); setInterval(hola,1500);
 document.getElementById('bMiCupon').onclick=()=>PP.miCupon(true);
+document.getElementById('bMiCupon2').onclick=async()=>{ const t=document.getElementById('holaTxt'), antes=t.textContent; t.textContent='Buscando tu cupón…';
+  const r=await PP.miCupon(true); if(!r||r.ok===false){ t.textContent='No se pudo consultar. Intenta en un momento.'; } else if(!r.existe){ t.textContent='Aún no tienes cupón. ¡Gana uno jugando!'; } else t.textContent=antes;
+  setTimeout(hola,3000); };
 async function revisarCupon(){ const r=await PP.miCupon(false); const b=document.getElementById('miCup');
   if(r&&r.existe&&r.estado==='ACTIVO'){ b.style.display='flex'; document.getElementById('miCupTxt').textContent=`🎉 Tienes ${r.descuento}% de descuento hasta el ${new Date(r.vence).toLocaleDateString('es-MX',{day:'numeric',month:'long'})}`; } else b.style.display='none'; }
 revisarCupon();
