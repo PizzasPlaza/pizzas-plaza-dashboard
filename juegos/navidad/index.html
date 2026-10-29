@@ -724,6 +724,7 @@ ruta(); requestAnimationFrame(bucle);
 
 // ---- versión GitHub Pages: registro + cupón en Google Sheet ----
 ganar=function(){ PP.ganar(); };
+const _pfN=prepararFondo; prepararFondo=function(){ _pfN(); capasFondo.forEach(c=>{ const g=c.getContext('2d'), w=c.width/DPR, h=c.height/DPR; [w*.22,w*.72].forEach(x=>PP.marcaAgua(g,x,h*.4,Math.min(W*.42,170),{alpha:.9,placa:true,borde:'#C8102E',color:'#FFF8E7'})); }); }; PP.conLogo(()=>{ if(W) prepararFondo(); });
 PP.init({casa:{top:'78px',right:'58px'},clave:'navidad',titulo:'¡Feliz Navidad!',mensaje:'Santa llegó al Zócalo a tiempo gracias a ti y a Plázido.',img:'../img/saludando.webp',protegidos:['bHistoria','bOtra','bRejugar'],alRejugar:nuevaPartida});
 </script>
 </body>

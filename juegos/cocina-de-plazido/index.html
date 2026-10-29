@@ -144,7 +144,7 @@ function pintarFondo(){
   g.fillStyle='#3B2410'; g.fillRect(OX+7*T,OY+7*T,3*T,2*T); g.fillStyle='rgba(255,120,30,.35)'; g.fillRect(OX+7*T+3,OY+8*T,3*T-6,T-4);
   g.fillStyle='#FCC10C'; g.font=`900 ${Math.max(8,T*.45)}px "Bebas Neue", Impact, sans-serif`; g.textAlign='center'; g.textBaseline='middle'; g.fillText('HORNO',OX+8.5*T,OY+7.5*T);
   // marca en el marco
-  g.font=`900 ${Math.max(10,T*.6)}px "Bebas Neue", Impact, sans-serif`; g.fillStyle='#FCC10C'; g.fillText('PIZZAS PLAZA · HECHAS EN SERIO, NO EN SERIE',W/2,OY+FILAS*T+T*.55);
+  g.font=`900 ${Math.max(10,T*.6)}px "Bebas Neue", Impact, sans-serif`; g.fillStyle='#FCC10C'; const yb=OY+FILAS*T, lw=Math.min(W*.42,170); if(PP.LOGO.complete&&PP.LOGO.naturalWidth){ const lh=lw*PP.LOGO.height/PP.LOGO.width; PP.marcaAgua(g,W/2,yb+12+lh/2+lw*.05,lw,{alpha:1,placa:true,color:'#FCC10C',fz:18}); } else g.fillText('PIZZAS PLAZA · HECHAS EN SERIO, NO EN SERIE',W/2,yb+T*.55);
 }
 const cx=t=>OX+(t+.5)*T, cy=t=>OY+(t+.5)*T;
 
@@ -282,6 +282,7 @@ function perder(){ estado='fin'; SND.pierde(); const r=PP.record('placiman',punt
 function pintarRecord(){ const r=PP.record('placiman'); $('record').textContent=r!==null?`Tu récord: ${r} puntos`:''; }
 $('bJugar').onclick=empezar; $('bOtra').onclick=empezar;
 medir(); nuevaPartida(); pintarRecord();
+PP.conLogo(()=>{ if(W) pintarFondo(); });
 PP.init({protegidos:['bJugar','bOtra'],casa:{bottom:'12px',right:'64px'},clave:'cocina-de-plazido',titulo:'¡Cocina limpia!',mensaje:'Plázido espantó a todas las moscas. ¡Aquí está tu premio!',logo:A.logo,img:A.feliz,alRejugar:empezar});
 requestAnimationFrame(bucle);
 </script>

@@ -113,6 +113,7 @@ h1,h2,.bebas{font-family:'Bebas Neue',Impact,sans-serif;letter-spacing:.5px;font
     <div class="msg" id="msg"></div>
   </div>
   <div class="grid" id="grid"></div>
+  <div class="ppCinta"><img src="../img/logo.png" alt="Pizzas Plaza"><span>HECHAS EN SERIO, NO EN SERIE</span></div>
 </section>
 
 <section id="fin" class="screen">
@@ -169,7 +170,7 @@ const SAL = 'PPlaza-2026-tB7'; // clave para firmar códigos
 const $ = id => document.getElementById(id);
 const store = { get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}} };
 const vib = ms => { try{navigator.vibrate && navigator.vibrate(ms)}catch(e){} };
-$('pctIni').textContent = DESCUENTO; $('pctCup').textContent = DESCUENTO;
+if($('pctIni')) $('pctIni').textContent = DESCUENTO; $('pctCup').textContent = DESCUENTO;
 
 // ===== INGREDIENTES (dibujo SVG centrado en 0,0) =====
 const ING = {

@@ -93,3 +93,8 @@
 
 .ppGira{animation:ppGira .7s ease-in-out infinite}
 @keyframes ppGira{0%,100%{transform:rotate(-12deg) scale(1)}50%{transform:rotate(12deg) scale(1.15)}}
+
+.ppCinta{display:flex;align-items:center;justify-content:center;gap:8px;background:#422913;border:2px solid #FCC10C;border-radius:12px;padding:4px 10px;margin:6px auto 0;width:fit-content;max-width:94%;box-shadow:0 3px 0 rgba(0,0,0,.25);flex-shrink:0}
+.ppCinta img{height:clamp(16px,5.4vw,22px);background:#FFF8E7;border-radius:6px;padding:2px 5px}
+.ppCinta span{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(11px,3.4vw,16px);letter-spacing:1px;color:#FCC10C;white-space:nowrap}
+@media (max-width:360px){.ppCinta span{font-size:14px}.ppCinta img{height:18px}}

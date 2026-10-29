@@ -154,7 +154,7 @@ function pintarFondo(){
   g.strokeStyle='rgba(150,100,50,.12)'; g.lineWidth=1;
   for(let x=0;x<=COLS;x++){ g.beginPath(); g.moveTo(BX+x*CELDA,BY); g.lineTo(BX+x*CELDA,BY+BH); g.stroke(); }
   for(let y=0;y<=FILAS;y++){ g.beginPath(); g.moveTo(BX,BY+y*CELDA); g.lineTo(BX+BW,BY+y*CELDA); g.stroke(); }
-  const ic=IMG.icono; if(ic&&ic.complete){ g.globalAlpha=.08; const s=BW*.7; g.drawImage(ic,BX+(BW-s)/2,BY+(BH-s)/2,s,s*ic.height/ic.width); g.globalAlpha=1; }
+  PP.marcaAgua(g,BX+BW/2,BY+BH*.5,BW*.8,{alpha:.17,color:'#8A5E2E'});
 }
 
 // ---------------- estado ----------------
@@ -266,6 +266,7 @@ function perder(){ if(estado==='fin') return; estado='fin'; musica(false); SND.p
 function pintarRecord(){ const r=PP.record('pizza-en-bloques'); $('record').textContent=r!==null?`Tu récord: ${r} puntos`:''; }
 $('bJugar').onclick=empezar; $('bOtra').onclick=empezar;
 medir(); tablero=vacio(); pintarRecord();
+PP.conLogo(()=>{ if(W) pintarFondo(); });
 PP.init({protegidos:['bJugar','bOtra'],casa:{top:'50px',left:'12px'},clave:'pizza-en-bloques',titulo:'¡Orden lista!',mensaje:`Horneaste ${META} pizzas. ¡Plázido te invita la siguiente!`,logo:A.logo,img:A.saludando,alRejugar:empezar});
 requestAnimationFrame(bucle);
 </script>

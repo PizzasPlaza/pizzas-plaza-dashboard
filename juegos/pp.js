@@ -187,7 +187,21 @@ const PP = (()=>{
   }
   function record(clave,valor,mayorEsMejor=true){ const k='pp_'+clave+'_record'; const r=store.get(k); const n=r===null?null:+r;
     if(valor!==undefined && (n===null || (mayorEsMejor?valor>n:valor<n))){ store.set(k,valor); return valor; } return n; }
-  return {init,ganar,miCupon,partida,pintarPas,record,store,api,antesDeJugar,proteger,registrado,cambiarNumero,sucursal,DESCUENTO};
+
+  // ===== Marca en el escenario de cada juego =====
+  const SLOGAN='HECHAS EN SERIO, NO EN SERIE';
+  const LOGO=new Image(); LOGO.src='../img/logo.png';
+  function conLogo(fn){ if(LOGO.complete&&LOGO.naturalWidth) fn(); else LOGO.addEventListener('load',()=>fn(),{once:true}); }
+  function letra(g,t,mw,fz){ g.font=`900 ${fz}px "Bebas Neue",Impact,sans-serif`; const w=g.measureText(t).width; if(w>mw) g.font=`900 ${fz*mw/w}px "Bebas Neue",Impact,sans-serif`; }
+  function slogan(g,x,y,mw,fz,color='#FCC10C',sombra){ g.save(); letra(g,SLOGAN,mw,fz); g.textAlign='center'; g.textBaseline='middle'; if(sombra){ g.shadowColor=sombra; g.shadowBlur=8; } g.fillStyle=color; g.fillText(SLOGAN,x,y); g.restore(); }
+  // logo (con placa crema opcional) + slogan debajo
+  function marcaAgua(g,x,y,w,o={}){ if(!(LOGO.complete&&LOGO.naturalWidth)) return; const a=o.alpha??.22, h=w*LOGO.height/LOGO.width, p=w*.05;
+    g.save(); g.globalAlpha=a;
+    if(o.placa){ g.fillStyle='#FFF8E7'; g.strokeStyle=o.borde||'#FCC10C'; g.lineWidth=3; g.beginPath(); (g.roundRect?g.roundRect(x-w/2-p,y-h/2-p,w+2*p,h+2*p,12):g.rect(x-w/2-p,y-h/2-p,w+2*p,h+2*p)); g.fill(); g.stroke(); }
+    g.drawImage(LOGO,x-w/2,y-h/2,w,h);
+    if(o.slogan!==false){ letra(g,SLOGAN,w*1.08,o.fz||Math.max(14,w*.11)); g.textAlign='center'; g.textBaseline='top'; g.fillStyle=o.color||'#FFF8E7'; g.fillText(SLOGAN,x,y+h/2+p+6); }
+    g.restore(); }
+  return {SLOGAN,LOGO,conLogo,slogan,marcaAgua,init,ganar,miCupon,partida,pintarPas,record,store,api,antesDeJugar,proteger,registrado,cambiarNumero,sucursal,DESCUENTO};
 })();
 
 // ===== Audio sintetizado compartido =====

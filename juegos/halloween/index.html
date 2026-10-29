@@ -488,6 +488,7 @@ medir(); P.alto=Math.min(H*.2,170); P.x=W/2; P.y=H-24; ruta(); requestAnimationF
 
 // ---- versión GitHub Pages: registro + cupón en Google Sheet ----
 ganar=function(){ PP.ganar(); };
+const _esc=escena; escena=function(){ _esc(); PP.marcaAgua(fondo.getContext('2d'),W*.38,H*.2,Math.min(W*.48,210),{alpha:.92,placa:true,borde:'#FF7A1A',color:'#FFD9A8'}); }; PP.conLogo(()=>{ if(W) escena(); });
 PP.init({casa:{bottom:'12px',right:'64px'},clave:'halloween',titulo:'¡Lo lograste!',mensaje:'Rescataste a los amigos de Plázido de la cocina embrujada.',img:'../img/saludando.webp',protegidos:['bJugar','bOtra','bRejugar'],alRejugar:empezar});
 </script>
 </body>

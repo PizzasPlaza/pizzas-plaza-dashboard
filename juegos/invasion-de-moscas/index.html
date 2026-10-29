@@ -226,6 +226,7 @@ function perder(msg){ if(estado==='fin') return; estado='fin'; SND.pierde(); con
 function pintarRecord(){ const r=PP.record('invasion-de-moscas'); $('record').textContent=r!==null?`Tu récord: ${r} puntos`:''; }
 $('bJugar').onclick=empezar; $('bOtra').onclick=empezar;
 medir(); P={x:W/2,y:H-62}; pintarRecord();
+const _pfM=pintarFondo; pintarFondo=function(){ _pfM(); PP.marcaAgua(fondo.getContext('2d'),W/2,H*.42,Math.min(W*.7,290),{alpha:.38,placa:true}); }; PP.conLogo(()=>{ if(W) pintarFondo(); });
 PP.init({protegidos:['bJugar','bOtra'],casa:{bottom:'12px',right:'64px'},clave:'invasion-de-moscas',titulo:'¡Pizzería a salvo!',mensaje:'Venciste a la Mosca Reina. ¡Plázido te invita!',logo:A.logo,img:A.saludando,alRejugar:empezar});
 requestAnimationFrame(bucle);
 </script>
