@@ -82,7 +82,7 @@ const TIPOS=[{a:'Amigo_Jalapeno',c1:'#9BE15D',c2:'#2E7D32'},{a:'Amigo_Pepperoni'
 const COLS=9, FILAS_INI=7, MAXF=16, FALLOS=5;
 const cv=$('c'), ctx=cv.getContext('2d'); let W,H,DPR,R,RH,OX,TOP0,LINEA,LX,LY,fondo=null,sprites=[];
 function medir(){ DPR=Math.min(2,devicePixelRatio||1); W=innerWidth; H=innerHeight; cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px'; ctx.setTransform(DPR,0,0,DPR,0,0);
-  R=Math.floor(Math.min(W*.96/(COLS*2), (H-260)/(2+ (MAXF-1)*1.732), 26)); RH=R*Math.sqrt(3); OX=Math.floor((W-COLS*2*R)/2); TOP0=104;
+  R=Math.floor(Math.min(W*.96/(COLS*2), (H-282)/(2+ (MAXF-1)*1.732), 26)); RH=R*Math.sqrt(3); OX=Math.floor((W-COLS*2*R)/2); TOP0=126;
   LY=H-96; LX=W/2; LINEA=LY-R*2.6; hacerSprites(); pintarFondo(); }
 addEventListener('resize',medir);
 function hacerSprites(){ sprites=TIPOS.map(t=>{ const s=document.createElement('canvas'), n=Math.ceil(R*2*DPR)+4; s.width=s.height=n; const g=s.getContext('2d'); g.scale(DPR,DPR); const r=R-.5, c=R+2/DPR;
@@ -91,6 +91,7 @@ function hacerSprites(){ sprites=TIPOS.map(t=>{ const s=document.createElement('
     g.fillStyle='rgba(255,255,255,.55)'; g.beginPath(); g.ellipse(c-r*.38,c-r*.48,r*.28,r*.15,-.6,0,7); g.fill();
     g.strokeStyle='rgba(255,255,255,.7)'; g.lineWidth=1.4; g.beginPath(); g.arc(c,c,r-.7,0,7); g.stroke(); return s; }); }
 const FRASES=['¡HECHAS EN SERIO!','¡NO EN SERIE!','¡SABOR PIZZAS PLAZA!','¡QUESAZO PLAZA!','¡RECIÉN HORNEADO!'];
+function ajusta(g,t,mw,fz){ g.font=`900 ${fz}px "Bebas Neue",Impact,sans-serif`; const w=g.measureText(t).width; if(w>mw) g.font=`900 ${fz*mw/w}px "Bebas Neue",Impact,sans-serif`; }
 function placa(g,x,y,w){ const L=IMG.logo; if(!L.complete||!L.naturalWidth) return; const h=w*L.height/L.width, p=8;
   g.fillStyle='#FFF8E7'; g.strokeStyle='#B22222'; g.lineWidth=3; g.beginPath(); g.roundRect(x-w/2-p,y-h/2-p*.7,w+2*p,h+1.4*p,10); g.fill(); g.stroke(); g.drawImage(L,x-w/2,y-h/2,w,h); }
 let cargadas=0; Object.values(IMG).forEach(i=>i.onload=()=>{ if(++cargadas>=5&&W){ hacerSprites(); pintarFondo(); } });
@@ -101,7 +102,7 @@ function pintarFondo(){ fondo=document.createElement('canvas'); fondo.width=W*DP
   // tablero
   g.fillStyle='rgba(20,10,4,.45)'; g.fillRect(OX-4,0,COLS*2*R+8,H); g.fillStyle='#FCC10C'; g.fillRect(OX-6,0,3,LY+20); g.fillRect(OX+COLS*2*R+3,0,3,LY+20);
   // logo gigante detrás de las burbujas (se descubre al liberarlas)
-  const L=IMG.logo; if(L.complete&&L.naturalWidth){ const w=COLS*2*R*.88, h=w*L.height/L.width; g.globalAlpha=.22; g.drawImage(L,OX+(COLS*2*R-w)/2,(TOP0+LINEA)/2-h/2,w,h); g.globalAlpha=1; }
+  const L=IMG.logo; if(L.complete&&L.naturalWidth){ const w=COLS*2*R*.88, h=w*L.height/L.width; g.globalAlpha=.22; g.drawImage(L,OX+(COLS*2*R-w)/2,(TOP0+LINEA)/2-h/2,w,h); g.fillStyle='#FFF8E7'; ajusta(g,'HECHAS EN SERIO, NO EN SERIE',COLS*2*R*.92,30); g.textAlign='center'; g.textBaseline='top'; g.fillText('HECHAS EN SERIO, NO EN SERIE',W/2,(TOP0+LINEA)/2+h/2+6); g.globalAlpha=1; }
   // mostrador
   const my=LY+R*1.2; g.fillStyle='#8B5A2B'; g.fillRect(0,my,W,H-my); g.fillStyle='#5E3A17'; g.fillRect(0,my,W,6);
   for(let x=0,i=0;x<W;x+=12,i++){ g.fillStyle=i%2?'#C8102E':'#FFF8E7'; g.fillRect(x,my+6,12,8); g.fillStyle=i%2?'#FFF8E7':'#C8102E'; g.fillRect(x,my+14,12,8); }
@@ -173,7 +174,8 @@ function techo(){ const y=TOP0+baja*RH; // queso derretido que baja
   ctx.beginPath(); ctx.moveTo(OX-4,0); ctx.lineTo(OX-4,y); const w=COLS*2*R+8;
   for(let i=0;i<=COLS*2;i++){ const xx=OX-4+i*w/(COLS*2), d=(i%3===1)?R*.7+Math.sin(reloj*2+i)*R*.15:R*.2; ctx.quadraticCurveTo(xx-w/(COLS*4),y+d,xx,y); } ctx.lineTo(OX+w-4,0); ctx.closePath(); ctx.fill();
   ctx.fillStyle='rgba(255,255,255,.35)'; ctx.fillRect(OX-4,y-6,w,2);
-  placa(ctx,W/2,(44+TOP0)/2-2,Math.min(COLS*2*R*.5,190));
+  placa(ctx,W/2,(44+TOP0)/2-12,Math.min(COLS*2*R*.46,170));
+  ctx.fillStyle='#7A3E10'; ajusta(ctx,'HECHAS EN SERIO, NO EN SERIE',COLS*2*R*.92,19); ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('HECHAS EN SERIO, NO EN SERIE',W/2,TOP0-16);
   ctx.fillStyle='#7A3E10'; ctx.font=`900 ${Math.min(16,R*.75)}px "Bebas Neue",Impact`; ctx.textAlign='center'; ctx.textBaseline='middle'; if(y>TOP0+10) ctx.fillText('🧀 QUESO DERRETIDO 🧀',W/2,y-RH/2); }
 function dibujar(){
   ctx.save(); if(temblor>0) ctx.translate(rnd(-4,4)*temblor*3,rnd(-4,4)*temblor*3);
@@ -219,7 +221,7 @@ addEventListener('keydown',e=>{ if(estado!=='jugando') return; if(e.key==='Arrow
 function capa(id){ document.querySelectorAll('.capa').forEach(c=>c.classList.toggle('on',c.id===id)); $('hud').classList.toggle('on',!id); }
 function empezar(){ SND.on(); capa(null); baja=0; fallos=0; puntos=0; tiro=null; caen=[]; parts=[]; textos=[]; llenar(); total=contar(); actual=nuevoColor(); reserva=nuevoColor(); ang=-Math.PI/2; pose='pose_2'; hud();
   estado='jugando'; aviso('¡A LIBERARLOS!','Junta 3 iguales',1100); }
-function ganar(){ estado='fin'; SND.gana(); pose='saludando'; aviso('¡TODOS LIBRES!','Liberaste a los amigos de Plázido',1700); PP.record('burbujas-de-queso',puntos); setTimeout(()=>PP.ganar(),1800); }
+function ganar(){ estado='fin'; SND.gana(); pose='saludando'; aviso('¡TODOS LIBRES!','Hechas en serio, no en serie 🍕',1700); PP.record('burbujas-de-queso',puntos); setTimeout(()=>PP.ganar(),1800); }
 function perder(){ if(estado==='fin') return; estado='fin'; SND.pierde(); pose='pose_3'; const r=PP.record('burbujas-de-queso',puntos); const lib=total-contar();
   $('finTxt').innerHTML=`Liberaste <b>${lib} de ${total}</b> burbujas con <b>${puntos}</b> puntos. Tu récord: <b>${r??puntos}</b>.`; setTimeout(()=>capa('fin'),700); }
 function pintarRecord(){ const r=PP.record('burbujas-de-queso'); $('record').textContent=r!==null?`Tu récord: ${r} puntos`:''; }

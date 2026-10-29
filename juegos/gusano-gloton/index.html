@@ -75,13 +75,14 @@ $('mute').textContent=SND.muted?'🔇':'🔊'; $('mute').onclick=()=>{ $('mute')
 const rnd=(a,b)=>a+Math.random()*(b-a);
 
 // ---------------- tablero en cuadrícula ----------------
-const COLS=15; let C=24, FILAS=24, OX=0, OY=100, ZONA=5; // ZONA = filas de abajo donde se mueve Plázido
+const COLS=15; let C=24, FILAS=24, OX=0, OY=122, ZONA=5; // ZONA = filas de abajo donde se mueve Plázido
 const cv=$('c'), ctx=cv.getContext('2d'); let W,H,DPR,fondo=null;
 function medir(){ DPR=Math.min(2,devicePixelRatio||1); W=innerWidth; H=innerHeight; cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px'; ctx.setTransform(DPR,0,0,DPR,0,0);
-  C=Math.floor(Math.min(W/COLS,(H-165)/20)); FILAS=Math.floor((H-OY-50)/C); OX=Math.floor((W-C*COLS)/2); pintarFondo(); }
+  C=Math.floor(Math.min(W/COLS,(H-187)/20)); FILAS=Math.floor((H-OY-50)/C); OX=Math.floor((W-C*COLS)/2); pintarFondo(); }
 addEventListener('resize',medir);
 const px=x=>OX+(x+.5)*C, py=y=>OY+(y+.5)*C;
 const FRASES=['¡HECHAS EN SERIO!','¡NO EN SERIE!','¡SABOR PIZZAS PLAZA!','¡RECIÉN HORNEADO!','¡QUÉ RICO, PLÁZIDO!'];
+function ajusta(g,t,mw,fz){ g.font=`900 ${fz}px "Bebas Neue",Impact,sans-serif`; const w=g.measureText(t).width; if(w>mw) g.font=`900 ${fz*mw/w}px "Bebas Neue",Impact,sans-serif`; }
 function placa(g,x,y,w){ const L=IMG.logo; if(!L.complete||!L.naturalWidth) return 0; const h=w*L.height/L.width, p=8;
   g.fillStyle='#FFF8E7'; g.strokeStyle='#FCC10C'; g.lineWidth=3; g.beginPath(); g.roundRect(x-w/2-p,y-h/2-p*.7,w+2*p,h+1.4*p,10); g.fill(); g.stroke(); g.drawImage(L,x-w/2,y-h/2,w,h); return h; }
 IMG.logo.onload=()=>{ if(W) pintarFondo(); };
@@ -94,12 +95,13 @@ function pintarFondo(){
   // pasto en las orillas
   g.fillStyle='#3E7B2E'; for(let x=0;x<W;x+=6){ const h=rnd(6,14); g.beginPath(); g.moveTo(x,OY); g.lineTo(x+3,OY-h); g.lineTo(x+6,OY); g.fill(); }
   // logo gigante pintado en la tierra
-  const L=IMG.logo; if(L.complete&&L.naturalWidth){ const w=C*COLS*.9, h=w*L.height/L.width, yy=OY+(FILAS-ZONA)*C/2-h/2; g.globalAlpha=.24; g.drawImage(L,OX+(C*COLS-w)/2,yy,w,h); g.globalAlpha=1; }
+  const L=IMG.logo; if(L.complete&&L.naturalWidth){ const w=C*COLS*.9, h=w*L.height/L.width, yy=OY+(FILAS-ZONA)*C/2-h/2; g.globalAlpha=.24; g.drawImage(L,OX+(C*COLS-w)/2,yy,w,h); g.fillStyle='#FFF8E7'; ajusta(g,'HECHAS EN SERIO, NO EN SERIE',C*COLS*.92,30); g.textAlign='center'; g.textBaseline='top'; g.fillText('HECHAS EN SERIO, NO EN SERIE',W/2,yy+h+6); g.globalAlpha=1; }
   // letrero de madera arriba
   g.fillStyle='#5E3A17'; g.fillRect(0,46,W,OY-52); g.fillStyle='#7A4D22'; for(let y=50;y<OY-8;y+=12) g.fillRect(0,y,W,5);
   g.fillStyle='#2B1A0E'; [14,W-14].forEach(x=>{ g.beginPath(); g.arc(x,OY-29,4,0,7); g.fill(); });
-  placa(g,W/2,(46+OY-6)/2,Math.min(W*.5,200));
-  g.fillStyle='#FCC10C'; g.font='900 11px Nunito'; g.textAlign='left'; g.textBaseline='middle'; if(W>=360){ g.fillText('🌙 LUNA',8,(46+OY-6)/2-7); g.fillText('PLAZA PARK',8,(46+OY-6)/2+7); g.textAlign='right'; g.fillText('HECHAS',W-8,(46+OY-6)/2-7); g.fillText('EN SERIO',W-8,(46+OY-6)/2+7); }
+  placa(g,W/2,(46+OY-28)/2,Math.min(W*.46,180));
+  g.fillStyle='#FCC10C'; g.shadowColor='#FCC10C'; g.shadowBlur=6; ajusta(g,'HECHAS EN SERIO, NO EN SERIE',C*COLS*.92,19); g.textAlign='center'; g.textBaseline='middle'; g.fillText('HECHAS EN SERIO, NO EN SERIE',W/2,OY-20); g.shadowBlur=0;
+  g.fillStyle='#FCC10C'; g.font='900 11px Nunito'; g.textAlign='left'; g.textBaseline='middle'; if(W>=360){ const ym=(46+OY-28)/2; g.fillText('🌙 LUNA',8,ym-7); g.fillText('PLAZA PARK',8,ym+7); g.textAlign='right'; g.fillText('PIZZAS',W-8,ym-7); g.fillText('PLAZA',W-8,ym+7); }
   // zona de la cocina (abajo): mantel de cuadros Pizzas Plaza
   const zy=OY+(FILAS-ZONA)*C; for(let y=0;y<ZONA*2;y++) for(let x=0;x<COLS*2;x++){ g.fillStyle=(x+y)%2?'rgba(200,16,46,.28)':'rgba(255,248,231,.16)'; g.fillRect(OX+x*C/2,zy+y*C/2,C/2,C/2); }
   g.fillStyle='rgba(255,248,231,.35)'; g.font=`900 ${C*.9}px "Bebas Neue",Impact`; g.textAlign='center'; g.textBaseline='middle'; g.fillText('COCINA PIZZAS PLAZA',W/2,zy+ZONA*C*.5); g.strokeStyle='rgba(252,193,12,.35)'; g.setLineDash([6,6]); g.beginPath(); g.moveTo(OX,zy); g.lineTo(OX+C*COLS,zy); g.stroke(); g.setLineDash([]);
@@ -220,7 +222,7 @@ addEventListener('keydown',e=>{ const d={ArrowLeft:[-1,0],ArrowRight:[1,0],Arrow
 function capa(id){ document.querySelectorAll('.capa').forEach(c=>c.classList.toggle('on',c.id===id)); $('hud').classList.toggle('on',!id); }
 function empezar(){ SND.on(); capa(null); vidas=3; puntos=0; ola=1; balas=[]; parts=[]; arana=null; sembrar(); nuevoGusano(); P={x:W/2,y:py(FILAS-2)}; obj={...P}; inv=1; hud();
   estado='jugando'; prev=performance.now(); aviso('¡AHÍ VIENE!','Rebana al gusano glotón',1200); }
-function ganar(){ estado='fin'; SND.gana(); aviso('¡HUERTO A SALVO!','Rebanaste a los 3 gusanos',1700); pose='saludando'; PP.record('gusano-gloton',puntos); setTimeout(()=>PP.ganar(),1800); }
+function ganar(){ estado='fin'; SND.gana(); aviso('¡HUERTO A SALVO!','Hechas en serio, no en serie 🍕',1700); pose='saludando'; PP.record('gusano-gloton',puntos); setTimeout(()=>PP.ganar(),1800); }
 function perder(){ if(estado==='fin') return; estado='fin'; SND.pierde(); const r=PP.record('gusano-gloton',puntos);
   $('finTxt').innerHTML=`Llegaste al <b>gusano ${ola} de 3</b> con <b>${puntos}</b> puntos. Tu récord: <b>${r??puntos}</b>.`; setTimeout(()=>capa('fin'),600); }
 function pintarRecord(){ const r=PP.record('gusano-gloton'); $('record').textContent=r!==null?`Tu récord: ${r} puntos`:''; }
