@@ -82,7 +82,7 @@ const TIPOS=[{a:'Amigo_Jalapeno',c1:'#9BE15D',c2:'#2E7D32'},{a:'Amigo_Pepperoni'
 const COLS=9, FILAS_INI=7, MAXF=16, FALLOS=5;
 const cv=$('c'), ctx=cv.getContext('2d'); let W,H,DPR,R,RH,OX,TOP0,LINEA,LX,LY,fondo=null,sprites=[];
 function medir(){ DPR=Math.min(2,devicePixelRatio||1); W=innerWidth; H=innerHeight; cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px'; ctx.setTransform(DPR,0,0,DPR,0,0);
-  R=Math.floor(Math.min(W*.96/(COLS*2), (H-210)/(2+ (MAXF-1)*1.732)/1.0, 26)); RH=R*Math.sqrt(3); OX=Math.floor((W-COLS*2*R)/2); TOP0=56;
+  R=Math.floor(Math.min(W*.96/(COLS*2), (H-260)/(2+ (MAXF-1)*1.732), 26)); RH=R*Math.sqrt(3); OX=Math.floor((W-COLS*2*R)/2); TOP0=104;
   LY=H-96; LX=W/2; LINEA=LY-R*2.6; hacerSprites(); pintarFondo(); }
 addEventListener('resize',medir);
 function hacerSprites(){ sprites=TIPOS.map(t=>{ const s=document.createElement('canvas'), n=Math.ceil(R*2*DPR)+4; s.width=s.height=n; const g=s.getContext('2d'); g.scale(DPR,DPR); const r=R-.5, c=R+2/DPR;
@@ -90,15 +90,21 @@ function hacerSprites(){ sprites=TIPOS.map(t=>{ const s=document.createElement('
     const im=IMG[t.a]; if(im.complete&&im.naturalWidth){ const k=r*1.55/Math.max(im.width,im.height); g.save(); g.beginPath(); g.arc(c,c,r*.92,0,7); g.clip(); g.drawImage(im,c-im.width*k/2,c-im.height*k/2+r*.05,im.width*k,im.height*k); g.restore(); }
     g.fillStyle='rgba(255,255,255,.55)'; g.beginPath(); g.ellipse(c-r*.38,c-r*.48,r*.28,r*.15,-.6,0,7); g.fill();
     g.strokeStyle='rgba(255,255,255,.7)'; g.lineWidth=1.4; g.beginPath(); g.arc(c,c,r-.7,0,7); g.stroke(); return s; }); }
-let cargadas=0; Object.values(IMG).forEach(i=>i.onload=()=>{ if(++cargadas>=5) hacerSprites(); });
+const FRASES=['¡HECHAS EN SERIO!','¡NO EN SERIE!','¡SABOR PIZZAS PLAZA!','¡QUESAZO PLAZA!','¡RECIÉN HORNEADO!'];
+function placa(g,x,y,w){ const L=IMG.logo; if(!L.complete||!L.naturalWidth) return; const h=w*L.height/L.width, p=8;
+  g.fillStyle='#FFF8E7'; g.strokeStyle='#B22222'; g.lineWidth=3; g.beginPath(); g.roundRect(x-w/2-p,y-h/2-p*.7,w+2*p,h+1.4*p,10); g.fill(); g.stroke(); g.drawImage(L,x-w/2,y-h/2,w,h); }
+let cargadas=0; Object.values(IMG).forEach(i=>i.onload=()=>{ if(++cargadas>=5&&W){ hacerSprites(); pintarFondo(); } });
 function pintarFondo(){ fondo=document.createElement('canvas'); fondo.width=W*DPR; fondo.height=H*DPR; const g=fondo.getContext('2d'); g.setTransform(DPR,0,0,DPR,0,0);
   const bg=g.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#6B3A1A'); bg.addColorStop(1,'#2A170A'); g.fillStyle=bg; g.fillRect(0,0,W,H);
   // ladrillos del horno
   for(let y=0,f=0;y<H;y+=18,f++) for(let x=(f%2)*-20;x<W;x+=40){ g.fillStyle=`rgba(${150+Math.random()*40|0},${70+Math.random()*25|0},35,.18)`; g.fillRect(x+1,y+1,38,16); }
   // tablero
   g.fillStyle='rgba(20,10,4,.45)'; g.fillRect(OX-4,0,COLS*2*R+8,H); g.fillStyle='#FCC10C'; g.fillRect(OX-6,0,3,LY+20); g.fillRect(OX+COLS*2*R+3,0,3,LY+20);
+  // logo gigante detrás de las burbujas (se descubre al liberarlas)
+  const L=IMG.logo; if(L.complete&&L.naturalWidth){ const w=COLS*2*R*.88, h=w*L.height/L.width; g.globalAlpha=.22; g.drawImage(L,OX+(COLS*2*R-w)/2,(TOP0+LINEA)/2-h/2,w,h); g.globalAlpha=1; }
   // mostrador
   const my=LY+R*1.2; g.fillStyle='#8B5A2B'; g.fillRect(0,my,W,H-my); g.fillStyle='#5E3A17'; g.fillRect(0,my,W,6);
+  for(let x=0,i=0;x<W;x+=12,i++){ g.fillStyle=i%2?'#C8102E':'#FFF8E7'; g.fillRect(x,my+6,12,8); g.fillStyle=i%2?'#FFF8E7':'#C8102E'; g.fillRect(x,my+14,12,8); }
   g.fillStyle='#FCC10C'; g.shadowColor='#FCC10C'; g.shadowBlur=8; let fz=18; const tt='PIZZAS PLAZA · HECHAS EN SERIO, NO EN SERIE'; g.font=`900 ${fz}px "Bebas Neue",Impact,sans-serif`; const tw=g.measureText(tt).width; if(tw>W-130){ fz*=(W-130)/tw; g.font=`900 ${fz}px "Bebas Neue",Impact,sans-serif`; } g.textAlign='left'; g.textBaseline='middle';
   g.fillText(tt,12,H-30); g.shadowBlur=0; }
 
@@ -138,14 +144,14 @@ function pegar(){ // busca la celda vacía más cercana
   const vis=new Set([r+','+c]), cola=[[r,c]], grupo=[];
   while(cola.length){ const [a,b]=cola.pop(); grupo.push([a,b]); vecinos(a,b).forEach(([x,y])=>{ const k=x+','+y; if(!vis.has(k)&&grid[x][y]===t){ vis.add(k); cola.push([x,y]); } }); }
   if(grupo.length>=3){
-    grupo.forEach(([a,b],i)=>{ boom(cx(a,b),cy(a),TIPOS[t].c1,8); grid[a][b]=null; }); const p=grupo.length*10; puntos+=p; texto(cx(r,c),cy(r),'+'+p,'#fff');
+    grupo.forEach(([a,b],i)=>{ boom(cx(a,b),cy(a),TIPOS[t].c1,8); grid[a][b]=null; }); const p=grupo.length*10; puntos+=p; texto(cx(r,c),cy(r),'+'+p,'#fff'); if(grupo.length>=4) texto(cx(r,c),cy(r)-20,FRASES[Math.random()*FRASES.length|0],'#FCC10C');
     SND.seq([660,880,1100].slice(0,Math.min(3,grupo.length-1)),'square',.05,.05); vib(20);
     // los que quedan colgando caen
     const vivo=new Set(), q=[]; for(let c2=0;c2<ncols(0);c2++) if(grid[0][c2]!=null){ vivo.add('0,'+c2); q.push([0,c2]); }
     while(q.length){ const [a,b]=q.pop(); vecinos(a,b).forEach(([x,y])=>{ const k=x+','+y; if(!vivo.has(k)&&grid[x][y]!=null){ vivo.add(k); q.push([x,y]); } }); }
     let n=0; for(let a=0;a<MAXF;a++) for(let b=0;b<ncols(a);b++) if(grid[a][b]!=null&&!vivo.has(a+','+b)){ caen.push({x:cx(a,b),y:cy(a),vx:rnd(-40,40),vy:rnd(-80,0),t:grid[a][b]}); grid[a][b]=null; n++; }
     if(n){ puntos+=n*20; texto(cx(r,c),cy(r)+24,`¡${n} cayeron! +${n*20}`,'#FCC10C'); setTimeout(()=>SND.bien(),150); }
-    if(grupo.length+n>=6){ pose='feliz'; poseT=1.2; aviso(grupo.length+n>=10?'¡QUESAZO!':'¡QUÉ COMBO!','',800); }
+    if(grupo.length+n>=6){ pose='feliz'; poseT=1.2; aviso(grupo.length+n>=10?'¡QUESAZO!':FRASES[Math.random()*FRASES.length|0],grupo.length+n>=10?'Hechas en serio, no en serie':'',900); }
   } else { fallos++; if(fallos>=FALLOS){ fallos=0; bajarTecho(); } }
   hud();
   if(!contar()) return ganar();
@@ -167,6 +173,7 @@ function techo(){ const y=TOP0+baja*RH; // queso derretido que baja
   ctx.beginPath(); ctx.moveTo(OX-4,0); ctx.lineTo(OX-4,y); const w=COLS*2*R+8;
   for(let i=0;i<=COLS*2;i++){ const xx=OX-4+i*w/(COLS*2), d=(i%3===1)?R*.7+Math.sin(reloj*2+i)*R*.15:R*.2; ctx.quadraticCurveTo(xx-w/(COLS*4),y+d,xx,y); } ctx.lineTo(OX+w-4,0); ctx.closePath(); ctx.fill();
   ctx.fillStyle='rgba(255,255,255,.35)'; ctx.fillRect(OX-4,y-6,w,2);
+  placa(ctx,W/2,(44+TOP0)/2-2,Math.min(COLS*2*R*.5,190));
   ctx.fillStyle='#7A3E10'; ctx.font=`900 ${Math.min(16,R*.75)}px "Bebas Neue",Impact`; ctx.textAlign='center'; ctx.textBaseline='middle'; if(y>TOP0+10) ctx.fillText('🧀 QUESO DERRETIDO 🧀',W/2,y-RH/2); }
 function dibujar(){
   ctx.save(); if(temblor>0) ctx.translate(rnd(-4,4)*temblor*3,rnd(-4,4)*temblor*3);
@@ -189,7 +196,7 @@ function dibujar(){
     if(tiro) burbuja(tiro.x,tiro.y,tiro.t);
   }
   parts.forEach(q=>{ ctx.globalAlpha=Math.max(0,q.v); ctx.fillStyle=q.c; ctx.beginPath(); ctx.arc(q.x,q.y,q.r,0,7); ctx.fill(); }); ctx.globalAlpha=1;
-  textos.forEach(x=>{ ctx.globalAlpha=Math.min(1,Math.max(0,x.v)); ctx.font='900 16px Nunito'; ctx.textAlign='center'; ctx.lineWidth=3; ctx.strokeStyle='#000'; ctx.strokeText(x.t,x.x,x.y); ctx.fillStyle=x.c; ctx.fillText(x.t,x.x,x.y); }); ctx.globalAlpha=1;
+  textos.forEach(x=>{ ctx.globalAlpha=Math.min(1,Math.max(0,x.v)); ctx.font=x.t.length>8?'900 13px Nunito':'900 16px Nunito'; ctx.textAlign='center'; ctx.lineWidth=3; ctx.strokeStyle='#000'; ctx.strokeText(x.t,x.x,x.y); ctx.fillStyle=x.c; ctx.fillText(x.t,x.x,x.y); }); ctx.globalAlpha=1;
   ctx.restore();
 }
 let prev=performance.now();
