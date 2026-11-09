@@ -212,7 +212,7 @@ const SND=(()=>{
     o.type=tipo; o.frequency.setValueAtTime(f,a); if(desliz) o.frequency.exponentialRampToValueAtTime(Math.max(30,f+desliz),a+d);
     g.gain.setValueAtTime(vol,a); g.gain.exponentialRampToValueAtTime(.0001,a+d); o.connect(g).connect(AC.destination); o.start(a); o.stop(a+d+.02); }
   const seq=(arr,tipo='triangle',vol=.08,paso=.1)=>arr.forEach((f,i)=>t(f,paso*1.4,tipo,vol,0,i*paso));
-  return { on, t, seq,
+  return { on, t, seq, get ctx(){return AC},
     get muted(){return muted}, toggle(){ muted=!muted; PP.store.set('pp_mute',muted?'1':'0'); on(); return muted; },
     ok:()=>seq([660,880],'square',.06,.07), bien:()=>seq([523,659,784,1046],'triangle',.08,.09),
     mal:()=>{t(220,.25,'sawtooth',.08,-120)}, click:()=>t(900,.04,'square',.04),

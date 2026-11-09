@@ -104,7 +104,7 @@ const foco=new THREE.DirectionalLight(0xFFFFFF,2.6); foco.position.set(8,22,10);
 Object.assign(foco.shadow.camera,{left:-12,right:12,top:12,bottom:-16,near:1,far:60}); foco.target.position.set(0,0,-6); escena.add(foco,foco.target);
 
 // ---------------- estadio ----------------
-const T={}; let balon, portero, plaz, red, redLat=[], sombraB, sombraP, led=[], gente, aficion=[], listo=false;
+const T={}, mantas=[]; let balon, portero, plaz, red, redLat=[], sombraB, sombraP, led=[], gente, aficion=[], listo=false;
 async function mundo(){
   const logo=await cargar(A.logo), icono=await cargar(A.icono);
   // pasto con franjas de podado
@@ -135,15 +135,32 @@ async function mundo(){
   const concreto=mat({color:0x5A6378,roughness:.95});
   const grada=(z0,x0,ancho,rot)=>{ const g=new THREE.Group(); for(let i=0;i<9;i++){ const e=new THREE.Mesh(new THREE.BoxGeometry(ancho,.9,1.6),concreto); e.position.set(0,.45+i*.9,-i*1.6); e.receiveShadow=true; g.add(e); } g.position.set(x0,1,z0); g.rotation.y=rot; escena.add(g); return g; };
   const gradas=[grada(GZ-9,0,60,0),grada(-14,-27,40,Math.PI/2),grada(-14,27,40,-Math.PI/2)];
+  // dónde van las mantas de la grada de atrás: [diseño, x, escalón]
+  const ANCHO=7.6; const MANTAS=[[0,-7.8,0],[1,0,0],[2,7.8,0],[3,-3.9,3],[4,3.9,3],[5,-11.7,3],[6,11.7,3],[1,-7.8,6],[0,0,6],[2,7.8,6],[6,-15.6,0],[5,15.6,0],[4,-15.6,6],[3,15.6,6]];
+  const tapa=(x,i)=>MANTAS.some(([k,bx,bi])=>(bi===i||bi===i+1)&&Math.abs(x-bx)<ANCHO/2+.2);
   // afición (cubitos de colores que brincan)
   const colores=[0xFCC10C,0xC8102E,0xFFFFFF,0x1E8A3A,0xFF7A1A,0x2B6CD9,0xE4007C].map(c=>new THREE.Color(c));
   const n=1500; gente=new THREE.InstancedMesh(new THREE.BoxGeometry(.42,.6,.32),new THREE.MeshStandardMaterial({roughness:.8}),n); const dummy=new THREE.Object3D(); let k=0;
-  gradas.forEach(g=>{ g.updateMatrixWorld(); const ancho=g.children[0].geometry.parameters.width; for(let i=0;i<9;i++) for(let x=-ancho/2+.5;x<ancho/2-.4&&k<n;x+=.62){ if(Math.random()<.12) continue; const p=new THREE.Vector3(x+rnd(-.08,.08),.9+.3+i*.9,-i*1.6+rnd(-.3,.1)).applyMatrix4(g.matrixWorld); aficion.push({p,f:Math.random()*6,a:rnd(.05,.25)}); dummy.position.copy(p); dummy.updateMatrix(); gente.setMatrixAt(k,dummy.matrix); gente.setColorAt(k,Math.random()<.45?colores[k%2]:colores[Math.random()*colores.length|0]); k++; } });
+  gradas.forEach(g=>{ g.updateMatrixWorld(); const ancho=g.children[0].geometry.parameters.width; for(let i=0;i<9;i++) for(let x=-ancho/2+.5;x<ancho/2-.4&&k<n;x+=.62){ if(Math.random()<.12) continue; if(g===gradas[0]&&tapa(x,i)) continue; const p=new THREE.Vector3(x+rnd(-.08,.08),.9+.3+i*.9,-i*1.6+rnd(-.3,.1)).applyMatrix4(g.matrixWorld); aficion.push({p,f:Math.random()*6,a:rnd(.05,.25)}); dummy.position.copy(p); dummy.updateMatrix(); gente.setMatrixAt(k,dummy.matrix); gente.setColorAt(k,Math.random()<.45?colores[k%2]:colores[Math.random()*colores.length|0]); k++; } });
   gente.count=k; escena.add(gente); gente.userData.dummy=dummy;
-  // mantas de Pizzas Plaza en la grada
-  T.manta=lienzo(1024,300,(g,w,h)=>{ g.fillStyle='#C8102E'; g.fillRect(0,0,w,h); g.fillStyle='#FCC10C'; g.fillRect(0,0,w,18); g.fillRect(0,h-18,w,18); if(logo){ const lw=w*.42, lh=lw*logo.height/logo.width; g.fillStyle='#FFF8E7'; g.beginPath(); g.roundRect(30,h/2-lh/2-14,lw+30,lh+28,16); g.fill(); g.drawImage(logo,45,h/2-lh/2,lw,lh); }
-    g.fillStyle='#fff'; g.font='900 82px "Bebas Neue",Impact'; g.textAlign='center'; g.textBaseline='middle'; g.fillText('¡VAMOS PLÁZIDO!',w*.73,h*.38); g.fillStyle='#FCC10C'; g.font='900 46px "Bebas Neue",Impact'; g.fillText('HECHAS EN SERIO, NO EN SERIE',w*.73,h*.7); });
-  [[-12,0],[12,0],[0,1]].forEach(([x,f])=>{ const m=new THREE.Mesh(new THREE.PlaneGeometry(10,2.9),new THREE.MeshStandardMaterial({map:T.manta,side:THREE.DoubleSide,roughness:.9})); m.position.set(x,2.2+f*4.2,GZ-9.3-f*7.4); escena.add(m); });
+  // mantas de Pizzas Plaza en la grada (muchas, grandes y ondeando)
+  const manta=(fondo,dib)=>lienzo(1024,288,(g,w,h)=>{ g.fillStyle=fondo; g.fillRect(0,0,w,h); dib(g,w,h); g.strokeStyle='rgba(0,0,0,.25)'; g.lineWidth=6; g.strokeRect(3,3,w-6,h-6); });
+  const conLogo=(g,w,h,x,lw)=>{ if(!logo) return; const lh=lw*logo.height/logo.width; g.fillStyle='#FFF8E7'; g.beginPath(); g.roundRect(x-lw/2-16,h/2-lh/2-12,lw+32,lh+24,14); g.fill(); g.drawImage(logo,x-lw/2,h/2-lh/2,lw,lh); };
+  const texto=(g,t,x,y,fz,col,mw)=>{ g.font=`900 ${fz}px "Bebas Neue",Impact,sans-serif`; const tw=g.measureText(t).width; if(tw>mw) g.font=`900 ${fz*mw/tw}px "Bebas Neue",Impact,sans-serif`; g.fillStyle=col; g.textAlign='center'; g.textBaseline='middle'; g.lineWidth=8; g.strokeStyle='rgba(0,0,0,.35)'; g.strokeText(t,x,y); g.fillText(t,x,y); };
+  T.mantas=[
+    manta('#FFF8E7',(g,w,h)=>{ g.fillStyle='#C8102E'; g.fillRect(0,0,w,26); g.fillRect(0,h-26,w,26); conLogo(g,w,h,w/2,w*.78); }),
+    manta('#C8102E',(g,w,h)=>{ g.fillStyle='#FCC10C'; g.fillRect(0,0,w,20); g.fillRect(0,h-20,w,20); texto(g,'PIZZAS PLAZA ALÉ ALÉ',w/2,h/2,150,'#FCC10C',w*.92); }),
+    manta('#1E8A3A',(g,w,h)=>{ texto(g,'¡VAMOS PLÁZIDO!',w/2,h/2,170,'#FFFFFF',w*.92); }),
+    manta('#422913',(g,w,h)=>{ g.fillStyle='#FCC10C'; g.fillRect(0,0,w,16); g.fillRect(0,h-16,w,16); texto(g,'HECHAS EN SERIO, NO EN SERIE',w/2,h/2,140,'#FCC10C',w*.94); }),
+    manta('#13254F',(g,w,h)=>{ texto(g,'🌙 LUNA PLAZA PARK 🌙',w/2,h/2,140,'#FCC10C',w*.92); }),
+    manta('#FFF8E7',(g,w,h)=>{ const n=16,s=w/n; for(let y=0;y<h/s;y++) for(let x=0;x<n;x++){ if((x+y)%2){ g.fillStyle='#C8102E'; g.fillRect(x*s,y*s,s,s); } } conLogo(g,w,h,w/2,w*.55); }),
+    manta('#FCC10C',(g,w,h)=>{ texto(g,'PIZZAS PLAZA',w/2,h*.36,150,'#C8102E',w*.9); texto(g,'¡CAMPEÓN!',w/2,h*.76,100,'#422913',w*.9); }),
+  ];
+  const ponManta=(k,x,i,ancho=ANCHO,lado=0)=>{ const geo=new THREE.PlaneGeometry(ancho,ancho*288/1024,24,4); const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:T.mantas[k],side:THREE.DoubleSide,roughness:.85}));
+    if(!lado) m.position.set(x,1+(i+1)*.9-.15,GZ-9+.9-i*1.6); else { m.position.set(lado*(27-1.0+i*1.6),1+(i+1)*.9-.15,x); m.rotation.y=-lado*Math.PI/2; }
+    m.userData.base=geo.attributes.position.array.slice(); m.userData.fase=Math.random()*6; escena.add(m); mantas.push(m); };
+  MANTAS.forEach(([k,x,i])=>ponManta(k,x,i,ANCHO));
+  [[1,-14,0],[0,-6,2],[3,-20,4]].forEach(([k,z,i])=>{ ponManta(k,z,i,7,-1); ponManta((k+2)%7,z,i,7,1); });
   // torres de luz
   const brillo=lienzo(128,128,(g,w,h)=>{ const gr=g.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,'rgba(255,255,255,1)'); gr.addColorStop(.3,'rgba(220,235,255,.6)'); gr.addColorStop(1,'rgba(200,220,255,0)'); g.fillStyle=gr; g.fillRect(0,0,w,h); });
   [[-26,-30],[26,-30],[-30,6],[30,6]].forEach(([x,z])=>{ const p=new THREE.Mesh(new THREE.CylinderGeometry(.3,.5,26,8),mat({color:0x444B5A,metalness:.4})); p.position.set(x,13,z); escena.add(p);
@@ -164,6 +181,34 @@ async function mundo(){
   listo=true; colocar();
 }
 function pose(k){ if(!plaz||!T.pose[k]) return; plaz.material.map=T.pose[k]; const im=T.pose[k].image; plaz.scale.set(1.35*im.width/im.height,1.35,1); }
+
+// ---------------- tribuna: ambiente + porra "Pizzas Plaza alé alé" (sintetizada) ----------------
+const TB={ini:false,prox:6};
+function tribunaIni(){ const AC=SND.ctx; if(!AC||TB.ini) return; TB.ini=true; TB.AC=AC;
+  TB.out=AC.createGain(); TB.out.gain.value=SND.muted?0:1; TB.out.connect(AC.destination);
+  const len=AC.sampleRate*2.4, ir=AC.createBuffer(2,len,AC.sampleRate); for(let c=0;c<2;c++){ const d=ir.getChannelData(c); for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.2); }
+  TB.rev=AC.createConvolver(); TB.rev.buffer=ir; const wet=AC.createGain(); wet.gain.value=.5; TB.rev.connect(wet).connect(TB.out);
+  TB.voz=AC.createGain(); TB.voz.gain.value=.55; TB.voz.connect(TB.out); TB.voz.connect(TB.rev);
+  const nb=AC.createBuffer(1,AC.sampleRate*4,AC.sampleRate), nd=nb.getChannelData(0); let u=0; for(let i=0;i<nd.length;i++){ u=(u+.04*(Math.random()*2-1))/1.04; nd[i]=u*3.2; } TB.ruido=nb;
+  const src=AC.createBufferSource(); src.buffer=nb; src.loop=true; const bp=AC.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=700; bp.Q.value=.5;
+  TB.amb=AC.createGain(); TB.amb.gain.value=.22; src.connect(bp).connect(TB.amb); TB.amb.connect(TB.out); TB.amb.connect(TB.rev); src.start(); }
+const FORM={a:[750,1250,2600],e:[450,1900,2550],i:[300,2250,3000],o:[480,900,2400]};
+function silaba(t0,dur,f,vocal,cons,vol=1){ const AC=TB.AC, bus=AC.createGain(); bus.gain.setValueAtTime(0,t0); bus.gain.linearRampToValueAtTime(.16*vol,t0+.035); bus.gain.setValueAtTime(.16*vol,t0+dur*.75); bus.gain.linearRampToValueAtTime(0,t0+dur+.06);
+  const fs=FORM[vocal].map((ff,k)=>{ const b=AC.createBiquadFilter(); b.type='bandpass'; b.frequency.value=ff; b.Q.value=k?7:5; const g=AC.createGain(); g.gain.value=[1,.55,.25][k]; b.connect(g).connect(bus); return b; });
+  for(let v=0;v<9;v++){ const o=AC.createOscillator(); o.type='sawtooth'; const oct=v%3===0?.5:1; o.frequency.value=f*oct*Math.pow(2,(Math.random()*44-22)/1200); const tt=t0+Math.random()*.045; o.frequency.setValueAtTime(o.frequency.value*.97,tt); o.frequency.linearRampToValueAtTime(o.frequency.value,tt+.06); fs.forEach(b=>o.connect(b)); o.start(tt); o.stop(t0+dur+.12); }
+  bus.connect(TB.voz);
+  if(cons){ const s=AC.createBufferSource(); s.buffer=TB.ruido; const hp=AC.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=cons==='s'?3800:cons==='p'?600:1800; const g=AC.createGain(); const d=cons==='s'?.09:.035; g.gain.setValueAtTime(.35*vol,t0-.01); g.gain.exponentialRampToValueAtTime(.001,t0+d); s.connect(hp).connect(g).connect(TB.voz); s.start(t0-.02,Math.random()*2,d+.05); } }
+function bombo(t0,vol=1){ const AC=TB.AC, o=AC.createOscillator(), g=AC.createGain(); o.frequency.setValueAtTime(95,t0); o.frequency.exponentialRampToValueAtTime(42,t0+.22); g.gain.setValueAtTime(.7*vol,t0); g.gain.exponentialRampToValueAtTime(.001,t0+.35); o.connect(g); g.connect(TB.out); g.connect(TB.rev); o.start(t0); o.stop(t0+.4); }
+function palmas(t0){ const AC=TB.AC; for(let k=0;k<3;k++){ const s=AC.createBufferSource(); s.buffer=TB.ruido; const bp=AC.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1500+k*400; bp.Q.value=1.2; const g=AC.createGain(); const tt=t0+k*.008; g.gain.setValueAtTime(.4,tt); g.gain.exponentialRampToValueAtTime(.001,tt+.07); s.connect(bp).connect(g); g.connect(TB.out); g.connect(TB.rev); s.start(tt,Math.random()*3,.1); } }
+// "Piz-zas Pla-za, a-lé, a-lé" (melodía original de porra)
+const N={D:146.8,F:174.6,G:196,A:220,C:261.6,Bb:233.1};
+const PORRA=[['i','p',N.D,.5],['a','s',N.D,.5],['a','p',N.F,.5],['a','s',N.D,.5],['a','',N.A,.5],['e','l',N.A,1],['a','',N.G,.5],['e','l',N.F,1]];
+const SLOGAN=[['e','',N.F,.5],['a','s',N.F,.5],['e','',N.F,.5],['e','s',N.A,.5],['o','',N.G,1],['o','n',N.F,.5],['e','',N.F,.5],['e','s',N.G,.5],['e','',N.A,1],['o','',N.C,.5],['e','l',N.A,1.5]];
+function porra(veces=2,conSlogan=false){ if(!TB.ini||SND.muted) return; const AC=TB.AC, B=.27; let t=AC.currentTime+.08;
+  const frase=f=>{ f.forEach(([v,c,fr,d],k)=>{ silaba(t,d*B*.92,fr,v,c); if(k%2===0){ bombo(t); } else palmas(t); t+=d*B; }); bombo(t); t+=B; };
+  for(let r=0;r<veces;r++) frase(PORRA); if(conSlogan) frase(SLOGAN); TB.prox=reloj+(t-AC.currentTime)+9+Math.random()*6; }
+function rugido(fuerza=1){ if(!TB.ini) return; const g=TB.amb.gain, n=TB.AC.currentTime; g.cancelScheduledValues(n); g.setValueAtTime(g.value,n); g.linearRampToValueAtTime(.22+.9*fuerza,n+.25); g.linearRampToValueAtTime(.22,n+3.5); }
+function tribunaTick(dt){ if(!TB.ini){ if(SND.ctx) tribunaIni(); return; } TB.out.gain.value=SND.muted?0:1; if((estado==='apuntar')&&reloj>TB.prox) porra(1); }
 
 // ---------------- juego ----------------
 let estado='menu', tiro=0, goles=0, atajadas=0, vuelo=null, port={x:0,y:.95,tx:0,ty:.95,t:0,dur:.5,rot:0,trot:0,listo:0}, reloj=0, sacude=0, festejo=0, redOnda=0, resultados=[];
@@ -187,15 +232,15 @@ function resolver(){ const {tx,ty}=vuelo, dx=Math.abs(tx-port.x), dy=Math.abs(ty
   return r; }
 const LOG=[];
 function finTiro(r){ LOG.push([r,vuelo.tx.toFixed(2),vuelo.ty.toFixed(2),port.x.toFixed(2),port.y.toFixed(2)].join(' ')); tiro++; const gol=r==='gol'; resultados.push(gol); if(gol) goles++; else if(r==='atajada') atajadas++; hud();
-  if(gol){ aviso('¡GOOOOL!',['Hechas en serio, no en serie ⚽','¡La afición enloquece!','¡Golazo de Plázido!'][Math.random()*3|0],1600); SND.seq([523,659,784,1046],'square',.08,.06); vib([40,30,80]); pose('feliz'); festejo=2.2; sacude=.25; redOnda=1; confeti(new THREE.Vector3(vuelo.tx,1.2,GZ+.5)); }
-  else if(r==='atajada'){ aviso('¡ATAJADA!','Jalapeño estuvo picosito 🌶️',1400); SND.seq([400,300],'sawtooth',.08,.08); pose('pose_3'); }
+  if(gol){ aviso('¡GOOOOL!',['Hechas en serio, no en serie ⚽','¡La afición enloquece!','¡Golazo de Plázido!'][Math.random()*3|0],1600); SND.seq([523,659,784,1046],'square',.08,.06); vib([40,30,80]); pose('feliz'); festejo=2.2; sacude=.25; redOnda=1; confeti(new THREE.Vector3(vuelo.tx,1.2,GZ+.5)); rugido(1); setTimeout(()=>porra(2),900); }
+  else if(r==='atajada'){ rugido(.35); aviso('¡ATAJADA!','Jalapeño estuvo picosito 🌶️',1400); SND.seq([400,300],'sawtooth',.08,.08); pose('pose_3'); }
   else if(r==='poste'){ aviso('¡AL POSTE!','¡Uyyy, casi!',1400); SND.t(1800,.25,'triangle',.08,-900); pose('pose_3'); sacude=.15; }
   else { aviso('¡AFUERA!','Apunta dentro de la portería',1400); SND.t(200,.25,'sine',.06,-80); pose('pose_3'); }
   const faltan=TIROS-tiro;
   setTimeout(()=>{ if(goles>=META) return ganar(); if(goles+faltan<META) return perder(); colocar(); estado='apuntar'; },1900); }
 function empezar(){ SND.on(); if(!listo) return; document.querySelectorAll('.capa').forEach(c=>c.classList.remove('on')); $('hud').classList.add('on'); $('ayuda').style.display='block';
-  tiro=0; goles=0; atajadas=0; resultados=[]; hud(); colocar(); estado='apuntar'; aviso('¡FINAL DE LA COPA!','Mete 3 de 5',1300); }
-function ganar(){ estado='fin'; SND.gana(); pose('saludando'); aviso('¡CAMPEONES!','Hechas en serio, no en serie 🏆',2000); confeti(new THREE.Vector3(0,2,-3),120); festejo=4; PP.record('penales-3d',goles); setTimeout(()=>PP.ganar(),2200); }
+  tiro=0; goles=0; atajadas=0; resultados=[]; hud(); colocar(); estado='apuntar'; aviso('¡FINAL DE LA COPA!','Mete 3 de 5',1300); tribunaIni(); porra(2,true); }
+function ganar(){ estado='fin'; SND.gana(); pose('saludando'); aviso('¡CAMPEONES!','Hechas en serio, no en serie 🏆',2000); confeti(new THREE.Vector3(0,2,-3),120); festejo=4; rugido(1); setTimeout(()=>porra(2,true),600); PP.record('penales-3d',goles); setTimeout(()=>PP.ganar(),2200); }
 function perder(){ estado='fin'; SND.pierde(); const r=PP.record('penales-3d',goles); $('finTxt').innerHTML=`Metiste <b>${goles} de ${TIROS}</b>. Necesitabas 3 para llevarte la copa. Tu récord: <b>${r??goles}</b> goles.`; setTimeout(()=>{ $('fin').classList.add('on'); $('hud').classList.remove('on'); },600); }
 $('bJugar').onclick=empezar; $('bOtra').onclick=empezar;
 const r0=PP.record('penales-3d'); $('record').textContent=r0!==null?`Tu récord: ${r0} goles`:'';
@@ -237,6 +282,8 @@ function bucle(ts){ const dt=Math.min(.05,(ts-prev)/1000); prev=ts; reloj+=dt;
     // afición: brinca más con los goles
     const ganas=festejo>0?1:.25, d=gente.userData.dummy; for(let i=0;i<gente.count;i++){ const a=aficion[i]; d.position.set(a.p.x,a.p.y+Math.max(0,Math.sin(reloj*(festejo>0?11:3)+a.f))*a.a*(festejo>0?2.4:1)*ganas*2,a.p.z); d.updateMatrix(); gente.setMatrixAt(i,d.matrix); } gente.instanceMatrix.needsUpdate=true;
     T.led.offset.x=(T.led.offset.x+dt*.05)%1;
+    for(const m of mantas){ const pa=m.geometry.attributes.position, b=m.userData.base, f=m.userData.fase, fuerza=festejo>0?.28:.12; for(let i=0;i<pa.count;i++){ const x=b[i*3], y=b[i*3+1]; pa.setZ(i,Math.sin(x*1.3+reloj*(festejo>0?7:3)+f)*fuerza*(.6+(y+1)*.3)); } pa.needsUpdate=true; m.geometry.computeVertexNormals(); }
+    tribunaTick(dt);
     for(let i=conf.length-1;i>=0;i--){ const c=conf[i]; c.vida-=dt; c.v.y-=6*dt; c.v.multiplyScalar(.99); c.m.position.addScaledVector(c.v,dt); c.m.rotation.x+=c.r.x*dt; c.m.rotation.y+=c.r.y*dt; if(c.vida<=0||c.m.position.y<0){ escena.remove(c.m); conf.splice(i,1); } }
     // cámara: detrás del balón; sigue un poco el tiro
     const sigue=estado==='vuelo'||estado==='despues'?clamp(-balon.position.z/11,0,1):0, menu=estado==='menu';
