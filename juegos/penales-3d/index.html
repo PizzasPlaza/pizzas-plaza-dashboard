@@ -178,6 +178,9 @@ async function mundo(){
   T.pose={}; for(const kk of ['pose_1','pose_2','feliz','pose_3','saludando','Amigo_Jalapeno']){ const im=await cargar(A[kk]); const t=new THREE.Texture(im); t.colorSpace=THREE.SRGBColorSpace; t.needsUpdate=true; T.pose[kk]=t; }
   portero=new THREE.Sprite(new THREE.SpriteMaterial({map:T.pose.Amigo_Jalapeno})); const pim=T.pose.Amigo_Jalapeno.image; portero.scale.set(1.9*pim.width/pim.height,1.9,1); escena.add(portero);
   plaz=new THREE.Sprite(new THREE.SpriteMaterial({map:T.pose.pose_2})); escena.add(plaz); pose('pose_2');
+  crearMira();
+  const suaveT=lienzo(64,64,(g,w,h)=>{ const gr=g.createRadialGradient(32,32,0,32,32,32); gr.addColorStop(0,'rgba(255,255,255,.9)'); gr.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=gr; g.fillRect(0,0,64,64); });
+  for(let k=0;k<14;k++){ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:suaveT,transparent:true,opacity:0,depthWrite:false})); sp.scale.set(.42,.42,1); escena.add(sp); rastro.push(sp); }
   listo=true; colocar();
 }
 function pose(k){ if(!plaz||!T.pose[k]) return; plaz.material.map=T.pose[k]; const im=T.pose[k].image; plaz.scale.set(1.35*im.width/im.height,1.35,1); }
@@ -212,20 +215,26 @@ function tribunaTick(dt){ if(!TB.ini){ if(SND.ctx) tribunaIni(); return; } TB.ou
 
 // ---------------- juego ----------------
 let estado='menu', tiro=0, goles=0, atajadas=0, vuelo=null, port={x:0,y:.95,tx:0,ty:.95,t:0,dur:.5,rot:0,trot:0,listo:0}, reloj=0, sacude=0, festejo=0, redOnda=0, resultados=[];
-function colocar(){ balon.position.set(0,.22,0); balon.rotation.set(0,0,0); port={x:0,y:.95,tx:0,ty:.95,t:1,dur:.5,rot:0,trot:0,espera:0}; plaz.position.set(-1.45,.68,-.6); pose('pose_2'); }
+function colocar(){ balon.position.set(0,.22,0); balon.rotation.set(0,0,0); port={x:0,y:.95,tx:0,ty:.95,t:1,dur:.5,rot:0,trot:0,espera:0}; plaz.position.set(-1.45,.68,-.6); plaz.material.rotation=0; pose('pose_2'); carrera=null; }
 function hud(){ $('hMarcador').textContent=`⚽ ${goles} – ${tiro-goles} 🌶️`; $('tiros').innerHTML=Array.from({length:TIROS},(_,i)=>{ const r=resultados[i]; return `<i class="${r===true?'g':r===false?'f':''}">${r===true?'⚽':r===false?'✖':''}</i>`; }).join(''); }
 function aviso(t,s,ms=1300){ const a=$('aviso'); a.innerHTML=t+(s?`<small>${s}</small>`:''); a.classList.add('on'); clearTimeout(a._t); a._t=setTimeout(()=>a.classList.remove('on'),ms); }
 const conf=[]; function confeti(p,n=60){ for(let i=0;i<n;i++){ const m=new THREE.Mesh(C.cg||(C.cg=new THREE.PlaneGeometry(.12,.08)),C['c'+i%5]||(C['c'+i%5]=new THREE.MeshBasicMaterial({color:[0xFCC10C,0xC8102E,0xFFFFFF,0x1E8A3A,0xFF7A1A][i%5],side:THREE.DoubleSide}))); m.position.copy(p); escena.add(m); conf.push({m,v:new THREE.Vector3(rnd(-4,4),rnd(3,8),rnd(-2,3)),r:new THREE.Vector3(rnd(-8,8),rnd(-8,8),0),vida:2.2}); } }
 const C={};
 
 // tiro: tx,ty = punto en la línea de gol; curva = efecto (metros)
-function tirar(tx,ty,curva){ if(estado!=='apuntar') return; estado='vuelo'; $('ayuda').style.display='none';
-  const vel=Math.hypot(tx,ty), dur=clamp(.95-vel*.04,.62,.85);
-  vuelo={t:0,dur,a:balon.position.clone(),b:new THREE.Vector3(tx,ty,GZ),curva,tx,ty};
-  plaz.position.x+=.25; plaz.position.z-=.25; pose('pose_1'); SND.t(160,.12,'sine',.12,-60); vib(18);
+function tirar(tx,ty,curva){ if(estado!=='apuntar') return; estado='carrera'; $('ayuda').style.display='none'; mira(false);
+  carrera={t:0,tx,ty,curva,x0:plaz.position.x,z0:plaz.position.z}; pose('pose_1'); }
+function patear(){ const {tx,ty,curva}=carrera; estado='vuelo';
+  const a=balon.position.clone(), b=new THREE.Vector3(tx,ty,GZ), c=ctrl(a,b,curva), largo=a.distanceTo(b);
+  vuelo={t:0,dur:clamp(.55+largo*.012+Math.abs(curva)*.06,.6,.82),a,b,c,curva,tx,ty}; rastro.forEach(r=>r.material.opacity=0);
+  SND.t(160,.12,'sine',.14,-60); SND.t(900,.03,'square',.04); vib(18); sacude=.06;
   // el portero adivina: entre más tiros, más listo
   const p=.2+tiro*.05, adivina=Math.random()<p; const gx=adivina?clamp(tx+rnd(-.9,.9),-3.2,3.2):elige([-2.7,-1.4,0,1.4,2.7]); const gy=adivina?clamp(ty,.5,2.1):rnd(.5,1.9);
-  port.ox=port.x; port.oy=port.y; port.tx=gx; port.ty=gy; port.t=0; port.dur=.5; port.espera=.12+Math.random()*.08; port.trot=Math.abs(gx)<.8?0:-Math.sign(gx)*clamp(Math.abs(gx)/3,0,1)*1.25; }
+  port.ox=port.x; port.oy=port.y; port.tx=gx; port.ty=gy; port.t=0; port.dur=.5; port.espera=.1+Math.random()*.08; port.trot=Math.abs(gx)<.8?0:-Math.sign(gx)*clamp(Math.abs(gx)/3,0,1)*1.25; }
+// punto de control de la curva: el balón llega EXACTO al punto elegido, el efecto solo dobla el camino
+function ctrl(a,b,curva){ const m=a.clone().lerp(b,.5); m.x+=curva*1.7; m.y+=.45+Math.max(0,b.y-.6)*.35; return m; }
+function bez(a,c,b,t,out=new THREE.Vector3()){ const u=1-t; return out.set(u*u*a.x+2*u*t*c.x+t*t*b.x, u*u*a.y+2*u*t*c.y+t*t*b.y, u*u*a.z+2*u*t*c.z+t*t*b.z); }
+let carrera=null;
 const elige=a=>a[Math.random()*a.length|0];
 function resolver(){ const {tx,ty}=vuelo, dx=Math.abs(tx-port.x), dy=Math.abs(ty-port.y);
   let r; if(Math.abs(Math.abs(tx)-GW/2)<.2&&ty<GH+.1) r='poste'; else if(Math.abs(ty-GH)<.18&&Math.abs(tx)<GW/2) r='poste'; else if(Math.abs(tx)>GW/2||ty>GH) r='afuera'; else if(dx<.95&&dy<1.05) r='atajada'; else r='gol';
@@ -244,18 +253,35 @@ function ganar(){ estado='fin'; SND.gana(); pose('saludando'); aviso('¡CAMPEONE
 function perder(){ estado='fin'; SND.pierde(); const r=PP.record('penales-3d',goles); $('finTxt').innerHTML=`Metiste <b>${goles} de ${TIROS}</b>. Necesitabas 3 para llevarte la copa. Tu récord: <b>${r??goles}</b> goles.`; setTimeout(()=>{ $('fin').classList.add('on'); $('hud').classList.remove('on'); },600); }
 $('bJugar').onclick=empezar; $('bOtra').onclick=empezar;
 const r0=PP.record('penales-3d'); $('record').textContent=r0!==null?`Tu récord: ${r0} goles`:'';
-window.__P={LOG,get estado(){return estado},tirar,get goles(){return goles},get tiro(){return tiro}};
+window.__P={LOG,cam,GZ,THREE,get balon(){return balon},get estado(){return estado},tirar,get goles(){return goles},get tiro(){return tiro}};
 
-// ---------------- deslizar ----------------
-const tz=$('trazo').getContext('2d'); let pts=null;
+// ---------------- deslizar (mira precisa) ----------------
+const tz=$('trazo').getContext('2d'); let pts=null, apunte=null; const ray=new THREE.Raycaster(), plano=new THREE.Plane(new THREE.Vector3(0,0,1),-GZ), ndc=new THREE.Vector2(), tmp=new THREE.Vector3();
+function enPorteria(sx,sy){ ndc.set(sx/innerWidth*2-1,-(sy/innerHeight)*2+1); ray.setFromCamera(ndc,cam); return ray.ray.intersectPlane(plano,tmp)?tmp.clone():null; }
+function aPantalla(v){ const q=v.clone().project(cam); return [(q.x+1)/2*innerWidth,(1-q.y)/2*innerHeight]; }
+function calcular(p){ if(!p||p.length<2) return null; const [x0,y0,t0]=p[0], [x1,y1,t1]=p[p.length-1], dx=x1-x0, dy=y1-y0; if(dy>-25) return null;
+  const yB=aPantalla(new THREE.Vector3(0,0,GZ))[1], yT=aPantalla(new THREE.Vector3(0,GH,GZ))[1];
+  let sx=x1, sy=y1;
+  if(y1>yB){ // tiro corto (flick): se alarga en la misma dirección; más rápido = más alto
+    const rap=clamp(Math.hypot(dx,dy)/Math.max(50,t1-t0),.3,3), h=clamp(.15+rap*.28,.15,1.05), objY=yB-(yB-yT)*h, k=(objY-y0)/dy; sx=x0+dx*k; sy=y0+dy*k; }
+  const g=enPorteria(sx,sy); if(!g) return null;
+  const m=p[Math.floor(p.length/2)], lx=x0+dx*((m[1]-y0)/dy), curva=clamp((m[0]-lx)/(innerWidth*.11),-1.3,1.3);
+  return {tx:clamp(g.x,-6,6),ty:clamp(g.y,.12,4.5),curva}; }
 cv.addEventListener('pointerdown',e=>{ SND.on(); if(estado!=='apuntar') return; pts=[[e.clientX,e.clientY,performance.now()]]; });
-cv.addEventListener('pointermove',e=>{ if(pts) pts.push([e.clientX,e.clientY,performance.now()]); });
-addEventListener('pointerup',e=>{ if(!pts) return; const p=pts; pts=null; if(p.length<2) return; const [x0,y0,t0]=p[0], [x1,y1,t1]=p[p.length-1], dx=x1-x0, dy=y1-y0; if(dy>-30) return;
-  const W=innerWidth,H=innerHeight, dt=Math.max(60,t1-t0), rapidez=Math.hypot(dx,dy)/dt;
-  const tx=dx/(W*.42)*4.3, ty=clamp((-dy/(H*.42))*2.3*(.75+clamp(rapidez,0,2.5)*.18),.15,4);
-  // efecto: qué tanto se separa el trazo de la línea recta (punto medio)
-  const m=p[Math.floor(p.length/2)], lx=x0+dx*((m[1]-y0)/(dy||1)), curva=clamp((m[0]-lx)/(W*.12),-1.4,1.4);
-  tirar(tx,ty,curva); });
+cv.addEventListener('pointermove',e=>{ if(!pts) return; pts.push([e.clientX,e.clientY,performance.now()]); apunte=calcular(pts); mira(apunte); });
+addEventListener('pointerup',e=>{ if(!pts) return; const p=pts; pts=null; const r=calcular(p); mira(false); if(r) tirar(r.tx,r.ty,r.curva); });
+// mira en la portería + camino punteado del balón
+let aro, guia; const GUIA_N=26;
+function crearMira(){ aro=new THREE.Group(); const m=new THREE.MeshBasicMaterial({color:0xFCC10C,transparent:true,opacity:.95,depthTest:false});
+  const r1=new THREE.Mesh(new THREE.RingGeometry(.22,.3,32),m); aro.add(r1); const r2=new THREE.Mesh(new THREE.CircleGeometry(.06,16),m); aro.add(r2);
+  [[0,1],[0,-1],[1,0],[-1,0]].forEach(([x,y])=>{ const l=new THREE.Mesh(new THREE.PlaneGeometry(x?.16:.04,x?.04:.16),m); l.position.set(x*.42,y*.42,0); aro.add(l); });
+  aro.renderOrder=10; aro.children.forEach(c=>c.renderOrder=10); aro.visible=false; escena.add(aro);
+  const g=new THREE.BufferGeometry().setFromPoints(Array.from({length:GUIA_N},()=>new THREE.Vector3())); guia=new THREE.Points(g,new THREE.PointsMaterial({color:0xFFFFFF,size:.09,transparent:true,opacity:.85,depthTest:false})); guia.renderOrder=9; guia.visible=false; escena.add(guia); }
+function mira(r){ if(!aro) return; if(!r){ aro.visible=guia.visible=false; return; } aro.visible=guia.visible=true; aro.position.set(r.tx,r.ty,GZ+.06);
+  const dentro=Math.abs(r.tx)<GW/2-.1&&r.ty<GH-.08; aro.children.forEach(c=>c.material.color.set(dentro?0xFCC10C:0xFF4D4D));
+  const a=balon.position, b=new THREE.Vector3(r.tx,r.ty,GZ), c=ctrl(a,b,r.curva), pa=guia.geometry.attributes.position; for(let k=0;k<GUIA_N;k++){ bez(a,c,b,(k+1)/(GUIA_N+1),tmp); pa.setXYZ(k,tmp.x,tmp.y,tmp.z); } pa.needsUpdate=true; }
+// estela del balón
+const rastro=[]; let rastroI=0;
 function pintarTrazo(){ tz.clearRect(0,0,innerWidth,innerHeight); if(!pts||pts.length<2) return; tz.lineCap='round'; tz.lineJoin='round';
   for(let i=1;i<pts.length;i++){ const a=i/pts.length; tz.strokeStyle=`rgba(252,193,12,${.25+a*.7})`; tz.lineWidth=4+a*10; tz.beginPath(); tz.moveTo(pts[i-1][0],pts[i-1][1]); tz.lineTo(pts[i][0],pts[i][1]); tz.stroke(); } }
 
@@ -263,14 +289,27 @@ function pintarTrazo(){ tz.clearRect(0,0,innerWidth,innerHeight); if(!pts||pts.l
 let prev=performance.now();
 function bucle(ts){ const dt=Math.min(.05,(ts-prev)/1000); prev=ts; reloj+=dt;
   if(listo){
-    // vuelo del balón: curva lateral + arco
-    if(vuelo&&estado==='vuelo'){ vuelo.t+=dt/vuelo.dur; const t=Math.min(1,vuelo.t), q=new THREE.Vector3().lerpVectors(vuelo.a,vuelo.b,t);
-      q.x+=vuelo.curva*Math.sin(Math.PI*t)*1.3; q.y+=Math.sin(Math.PI*t)*.35; balon.position.copy(q); balon.rotation.x-=dt*22; balon.rotation.y+=vuelo.curva*dt*14;
-      if(t>=1){ const r=resolver(); vuelo.res=r; estado='despues'; vuelo.v=r==='gol'?new THREE.Vector3(vuelo.curva*.6,-.5,-4):r==='atajada'?new THREE.Vector3(rnd(-2,2),2.5,5):r==='poste'?new THREE.Vector3(-Math.sign(vuelo.tx)*2,1.5,4):new THREE.Vector3(Math.sign(vuelo.tx)*2,.5,-6); finTiro(r); } }
+    // carrera de Plázido hacia el balón (solo se mueve e inclina, sin deformarse)
+    if(estado==='carrera'&&carrera){ carrera.t+=dt/.34; const e=suave(Math.min(1,carrera.t)); plaz.position.x=carrera.x0+(-.85-carrera.x0)*e; plaz.position.z=carrera.z0+(-.4-carrera.z0)*e; plaz.position.y=.68+Math.abs(Math.sin(e*Math.PI*3))*.09; plaz.material.rotation=-.22*e;
+      if(carrera.t>=1){ plaz.material.rotation=.12; patear(); } }
+    else if(plaz) plaz.material.rotation+=(0-plaz.material.rotation)*Math.min(1,dt*6);
+    // vuelo del balón: curva Bézier que llega exacto al punto elegido
+    if(vuelo&&estado==='vuelo'){ vuelo.t+=dt/vuelo.dur; const t=Math.min(1,vuelo.t); bez(vuelo.a,vuelo.c,vuelo.b,t,balon.position);
+      balon.rotation.x-=dt*26; balon.rotation.y+=vuelo.curva*dt*18;
+      const r=rastro[rastroI++%rastro.length]; r.position.copy(balon.position); r.material.opacity=.55;
+      if(t>=1){ const res=resolver(); vuelo.res=res; estado='despues';
+        const T=new THREE.Vector3().subVectors(vuelo.b,vuelo.c).multiplyScalar(2/vuelo.dur);
+        vuelo.v= res==='gol'? T.clone().multiplyScalar(.45)
+              : res==='atajada'? new THREE.Vector3(-T.x*.25+Math.sign(balon.position.x-port.x||1)*3,2.6,6.5)
+              : res==='poste'? new THREE.Vector3(-T.x*.35-Math.sign(vuelo.tx)*1.2,1.2+T.y*.1,6)
+              : T.clone().multiplyScalar(.8);
+        if(res==='poste') SND.t(1900,.3,'triangle',.1,-1100); if(res==='atajada') SND.t(120,.12,'sine',.12,-40);
+        finTiro(res); } }
+    rastro.forEach(r=>{ if(r.material.opacity>0){ r.material.opacity=Math.max(0,r.material.opacity-dt*2.2); r.scale.setScalar(.42*(.4+r.material.opacity)); } });
     if(estado==='despues'||(estado==='fin'&&vuelo&&vuelo.v)){ vuelo.v.y-=9.8*dt; balon.position.addScaledVector(vuelo.v,dt); if(vuelo.res==='gol'&&balon.position.z<GZ-1.7){ balon.position.z=GZ-1.7; vuelo.v.z=0; vuelo.v.x*=.5; }
       if(balon.position.y<.22){ balon.position.y=.22; vuelo.v.y=Math.abs(vuelo.v.y)*.45; vuelo.v.x*=.8; vuelo.v.z*=.8; } balon.rotation.x-=dt*8; }
     // portero: espera, se avienta, se inclina (sin deformar)
-    if(estado==='apuntar'||estado==='menu'){ port.x=Math.sin(reloj*1.6)*.7; port.y=.95+Math.abs(Math.sin(reloj*3.2))*.12; port.rot=Math.sin(reloj*1.6)*.06; }
+    if(estado==='apuntar'||estado==='menu'||estado==='carrera'){ port.x=Math.sin(reloj*1.6)*.7; port.y=.95+Math.abs(Math.sin(reloj*3.2))*.12; port.rot=Math.sin(reloj*1.6)*.06; }
     else if(port.espera>0) port.espera-=dt;
     else if(port.t<1){ port.t=Math.min(1,port.t+dt/port.dur); const e=suave(port.t); port.x=port.ox+(port.tx-port.ox)*e; port.y=port.oy+(port.ty-port.oy)*e+Math.sin(Math.PI*port.t)*.25; port.rot=port.trot*e; }
     portero.position.set(port.x,port.y,GZ+.35); portero.material.rotation=port.rot; sombraP.position.set(port.x,.015,GZ+.4); sombraP.scale.set(1-(port.y-.95)*.3,1,1);
@@ -278,7 +317,7 @@ function bucle(ts){ const dt=Math.min(.05,(ts-prev)/1000); prev=ts; reloj+=dt;
     // Plázido festeja brincando
     if(festejo>0){ festejo-=dt; plaz.position.y=.68+Math.abs(Math.sin(reloj*9))*.35; } else plaz.position.y=.68;
     // red que se mueve con el gol
-    if(redOnda>0){ redOnda=Math.max(0,redOnda-dt*.8); const pa=red.geometry.attributes.position, b=red.userData.base; for(let i=0;i<pa.count;i++){ const x=b[i*3], y=b[i*3+1]; const d=Math.hypot(x-(vuelo?vuelo.tx:0),y); pa.setZ(i,b[i*3+2]-Math.max(0,1.2-d*.45)*Math.sin(reloj*14)*redOnda*.35); } pa.needsUpdate=true; }
+    if(redOnda>0){ redOnda=Math.max(0,redOnda-dt*.8); const pa=red.geometry.attributes.position, b=red.userData.base; for(let i=0;i<pa.count;i++){ const x=b[i*3], y=b[i*3+1]; const d=Math.hypot(x-(vuelo?vuelo.tx:0),y-(vuelo?vuelo.ty-.95:0)); pa.setZ(i,b[i*3+2]-Math.max(0,1.2-d*.45)*Math.sin(reloj*14)*redOnda*.35); } pa.needsUpdate=true; }
     // afición: brinca más con los goles
     const ganas=festejo>0?1:.25, d=gente.userData.dummy; for(let i=0;i<gente.count;i++){ const a=aficion[i]; d.position.set(a.p.x,a.p.y+Math.max(0,Math.sin(reloj*(festejo>0?11:3)+a.f))*a.a*(festejo>0?2.4:1)*ganas*2,a.p.z); d.updateMatrix(); gente.setMatrixAt(i,d.matrix); } gente.instanceMatrix.needsUpdate=true;
     T.led.offset.x=(T.led.offset.x+dt*.05)%1;
