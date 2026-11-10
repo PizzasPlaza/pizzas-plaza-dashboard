@@ -26,7 +26,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#F3D9A4;font-family:Nu
 #hud{position:fixed;top:0;left:0;right:0;height:46px;display:none;justify-content:space-between;align-items:center;padding:0 10px;z-index:3;font-weight:900;pointer-events:none}
 #hud.on{display:flex}
 .chip{background:rgba(66,41,19,.92);color:var(--oro);border:2px solid var(--oro);border-radius:12px;padding:2px 10px;font-size:16px}
-#cuenta{position:fixed;top:56px;left:0;right:0;text-align:center;font-family:'Bebas Neue',Impact;font-size:64px;color:#fff;text-shadow:0 4px 0 #C8102E,0 0 18px rgba(0,0,0,.35);z-index:3;pointer-events:none;display:none}
+#cuenta{position:fixed;bottom:118px;right:16px;text-align:right;font-family:'Bebas Neue',Impact;font-size:54px;color:#fff;text-shadow:0 4px 0 #C8102E,0 0 18px rgba(0,0,0,.35);z-index:3;pointer-events:none;display:none}
 #host{position:fixed;left:8px;bottom:10px;z-index:3;display:none;align-items:flex-end;gap:4px;pointer-events:none}
 #host img{height:96px;transition:transform .2s}
 #globo{background:#fff;color:#422913;font-weight:900;font-size:14px;border-radius:14px;padding:6px 10px;margin-bottom:60px;max-width:160px;opacity:0;transform:scale(.6);transition:all .2s}
@@ -34,7 +34,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#F3D9A4;font-family:Nu
 #aviso{position:fixed;left:50%;top:40%;width:94%;transform:translate(-50%,-50%) scale(.6);opacity:0;transition:all .25s cubic-bezier(.2,1.6,.5,1);z-index:4;font-family:'Bebas Neue',Impact;font-size:clamp(34px,11vw,58px);line-height:1;color:var(--oro);text-shadow:0 4px 0 #C8102E,0 0 22px rgba(0,0,0,.6);pointer-events:none;text-align:center}
 #aviso.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
 #aviso small{display:block;font-family:Nunito;font-size:16px;font-weight:900;color:#fff;text-shadow:0 2px 6px #000;margin-top:6px}
-#tapa{position:fixed;left:0;right:0;bottom:118px;text-align:center;font-weight:900;font-size:15px;color:#422913;z-index:3;pointer-events:none;display:none;text-shadow:0 1px 0 #fff}
+#tapa{position:fixed;left:0;right:0;bottom:70px;text-align:center;font-weight:900;font-size:15px;color:#422913;z-index:3;pointer-events:none;display:none;text-shadow:0 1px 0 #fff}
 #mute{position:fixed;bottom:12px;right:12px;z-index:6;background:#422913;border:3px solid var(--oro);color:#fff;border-radius:50%;width:44px;height:44px;font-size:18px}
 </style>
 <link rel="stylesheet" href="../pp.css">
@@ -92,7 +92,7 @@ ren.setPixelRatio(Math.min(1.75,devicePixelRatio||1)); cv.addEventListener('webg
 ren.outputColorSpace=THREE.SRGBColorSpace; ren.toneMapping=THREE.ACESFilmicToneMapping; ren.toneMappingExposure=1.05;
 const escena=new THREE.Scene();
 const cam=new THREE.PerspectiveCamera(38,1,.1,200);
-function tamano(){ const w=innerWidth,h=innerHeight; ren.setSize(w,h,false); cam.aspect=w/h; cam.fov=w<h?42:32; cam.updateProjectionMatrix(); }
+function tamano(){ const w=innerWidth,h=innerHeight; ren.setSize(w,h,true); cam.aspect=w/h; cam.fov=w<h?42:32; cam.updateProjectionMatrix(); }
 addEventListener('resize',tamano); tamano();
 
 function lienzo(w,h,fn){ const c=document.createElement('canvas'); c.width=w; c.height=h; fn(c.getContext('2d'),w,h); const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; t.anisotropy=ren.capabilities.getMaxAnisotropy(); return t; }

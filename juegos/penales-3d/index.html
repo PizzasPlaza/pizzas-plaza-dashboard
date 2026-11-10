@@ -91,7 +91,7 @@ const ren=new THREE.WebGLRenderer({canvas:cv,antialias:true});
 ren.setPixelRatio(Math.min(1.75,devicePixelRatio||1)); ren.shadowMap.enabled=true; ren.shadowMap.type=THREE.PCFSoftShadowMap;
 ren.outputColorSpace=THREE.SRGBColorSpace; ren.toneMapping=THREE.ACESFilmicToneMapping; ren.toneMappingExposure=1.15;
 const escena=new THREE.Scene(), cam=new THREE.PerspectiveCamera(60,1,.1,300);
-function tamano(){ const w=innerWidth,h=innerHeight; ren.setSize(w,h,false); cam.aspect=w/h; cam.fov=w<h?64:48; cam.updateProjectionMatrix(); const t=$('trazo'); t.width=w; t.height=h; }
+function tamano(){ const w=innerWidth,h=innerHeight; ren.setSize(w,h,true); cam.aspect=w/h; cam.fov=w<h?64:48; cam.updateProjectionMatrix(); const t=$('trazo'); t.width=w; t.height=h; }
 addEventListener('resize',tamano); tamano();
 function lienzo(w,h,fn){ const c=document.createElement('canvas'); c.width=w; c.height=h; fn(c.getContext('2d'),w,h); const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; t.anisotropy=Math.min(8,ren.capabilities.getMaxAnisotropy()); return t; }
 const mat=o=>new THREE.MeshStandardMaterial(Object.assign({roughness:.8},o));
