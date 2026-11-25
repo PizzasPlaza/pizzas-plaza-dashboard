@@ -190,7 +190,7 @@ const PP = (()=>{
 
   // ===== Marca en el escenario de cada juego =====
   const SLOGAN='HECHAS EN SERIO, NO EN SERIE';
-  const LOGO=new Image(); LOGO.src='../img/logo.png';
+  const LOGO=new Image(); LOGO.src=(document.currentScript&&document.currentScript.src)?new URL('img/logo.png',document.currentScript.src).href:'../img/logo.png';
   function conLogo(fn){ if(LOGO.complete&&LOGO.naturalWidth) fn(); else LOGO.addEventListener('load',()=>fn(),{once:true}); }
   function letra(g,t,mw,fz){ g.font=`900 ${fz}px "Bebas Neue",Impact,sans-serif`; const w=g.measureText(t).width; if(w>mw) g.font=`900 ${fz*mw/w}px "Bebas Neue",Impact,sans-serif`; }
   function slogan(g,x,y,mw,fz,color='#FCC10C',sombra){ g.save(); letra(g,SLOGAN,mw,fz); g.textAlign='center'; g.textBaseline='middle'; if(sombra){ g.shadowColor=sombra; g.shadowBlur=8; } g.fillStyle=color; g.fillText(SLOGAN,x,y); g.restore(); }
