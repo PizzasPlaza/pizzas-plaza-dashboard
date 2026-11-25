@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tablero de resultados · Luna Plaza Park</title>
+<link rel="icon" href="img/icono.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+.viz-root{color-scheme:light;--surface-0:#F6F3EE;--surface-1:#FFFFFF;--line:#E7E1D8;--text-primary:#1F1A17;--text-secondary:#6B625A;--series-1:#C8102E;--series-1-wash:rgba(200,16,46,.1);--accent:#FCC10C;--good:#1E8A3A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-0);font-family:Nunito,system-ui,sans-serif;color:var(--text-primary)}
+header{background:#422913;color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header .plato{background:#FFF8E7;border-radius:10px;padding:4px 8px;display:flex}header .plato img{height:26px}
+header h1{font-family:'Bebas Neue',Impact,sans-serif;font-size:28px;letter-spacing:1px;margin:0;color:var(--accent);flex:1;line-height:1}
+header small{display:block;font-family:Nunito;font-size:12px;font-weight:700;color:#E9D9C4;letter-spacing:0}
+.filtros{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.filtros button{font:800 13px Nunito;border:2px solid var(--accent);background:transparent;color:var(--accent);border-radius:20px;padding:5px 12px;cursor:pointer}
+.filtros button.on{background:var(--accent);color:#422913}
+main{max-width:1180px;margin:0 auto;padding:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:12px}
+.kpi{background:var(--surface-1);border-radius:16px;padding:12px 14px;border:1px solid var(--line)}
+.kpi .n{font-family:'Bebas Neue',Impact,sans-serif;font-size:38px;line-height:1;margin-top:2px}
+.kpi .l{font-weight:800;font-size:13px;color:var(--text-secondary)}
+.kpi .s{font-weight:700;font-size:12px;color:var(--text-secondary);margin-top:4px}
+.kpi.dest{background:#422913;color:#fff;border-color:#422913}.kpi.dest .l,.kpi.dest .s{color:#E9D9C4}.kpi.dest .n{color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px}
+.card{background:var(--surface-1);border-radius:16px;border:1px solid var(--line);padding:14px;min-width:0}
+.card h2{font-size:16px;font-weight:900;margin:0}
+.card .sub{font-size:12px;font-weight:700;color:var(--text-secondary);margin:2px 0 10px}
+.ancho{grid-column:1/-1}
+svg text{font-family:Nunito,system-ui,sans-serif}
+.tip{position:fixed;pointer-events:none;background:#1F1A17;color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:800;opacity:0;transition:opacity .1s;z-index:9;white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-weight:900;text-align:left;color:var(--text-secondary);font-size:12px;padding:6px 6px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;user-select:none}
+th.num,td.num{text-align:right}
+td{padding:7px 6px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
+td .barra{display:inline-block;height:10px;background:var(--series-1);border-radius:0 4px 4px 0;vertical-align:middle;margin-left:6px;min-width:2px}
+.tabla-scroll{overflow-x:auto}
+#login{max-width:340px;margin:12vh auto;background:var(--surface-1);border-radius:20px;padding:22px;text-align:center;border:1px solid var(--line)}
+#login input{font:900 26px Nunito;text-align:center;width:100%;border-radius:12px;border:2px solid var(--line);padding:8px;margin:12px 0;letter-spacing:6px}
+#login button{font-family:'Bebas Neue',Impact;font-size:26px;border:0;border-radius:12px;background:var(--series-1);color:#fff;width:100%;padding:8px 0 5px;cursor:pointer}
+#login p{font-weight:700;font-size:13px;color:var(--text-secondary)}
+.err{color:#C8102E!important}
+.nota{font-size:12px;font-weight:700;color:var(--text-secondary);margin-top:8px}
+.vacio{font-weight:800;color:var(--text-secondary);padding:30px 0;text-align:center}
+</style>
+</head>
+<body class="viz-root">
+<header><div class="plato"><img src="img/logo.png" alt="Pizzas Plaza"></div><h1>TABLERO DE RESULTADOS<small id="gen">Luna Plaza Park · juegos y cupones</small></h1>
+<div class="filtros" id="filtros" style="display:none"><button data-d="7">7 días</button><button data-d="30" class="on">30 días</button><button data-d="90">90 días</button><button data-d="365">1 año</button><button id="salir">Salir</button></div></header>
+<div id="login"><b style="font-size:20px">🔒 Solo dirección</b><p>Escribe el PIN de la fila <b>ADMIN</b> de la hoja "Sucursales".</p><input id="pin" type="password" inputmode="numeric" autocomplete="off"><button id="entrar">ENTRAR</button><p id="lmsg"></p></div>
+<main id="app" style="display:none">
+  <div class="kpis" id="kpis"></div>
+  <div class="grid">
+    <div class="card ancho"><h2>Partidas por día</h2><div class="sub">Cuántas veces jugaron cada día</div><div id="cPartidas"></div></div>
+    <div class="card"><h2>Cupones canjeados por día</h2><div class="sub">Cada canje es una visita a la sucursal</div><div id="cCanjes"></div></div>
+    <div class="card"><h2>¿Cuántas veces regresan?</h2><div class="sub">Clientes según cuántos cupones han canjeado (histórico)</div><div id="cFrec"></div></div>
+    <div class="card ancho"><h2>Por sucursal</h2><div class="sub">Toca un encabezado para ordenar</div><div class="tabla-scroll" id="tSuc"></div></div>
+    <div class="card"><h2>Juegos más jugados</h2><div class="sub">Partidas en el periodo</div><div id="cJuegos"></div></div>
+    <div class="card"><h2>Premios canjeados</h2><div class="sub">Qué premio se llevaron en caja</div><div id="cPremios"></div></div>
+    <div class="card ancho"><h2>Detalle por juego</h2><div class="sub">Toca un encabezado para ordenar</div><div class="tabla-scroll" id="tJuegos"></div></div>
+  </div>
+  <p class="nota">Los datos salen en vivo de la Google Sheet. "Regresaron" = clientes con 2 o más cupones canjeados.</p>
+</main>
+<div class="tip" id="tip"></div>
+<script src="config.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const NOMBRES={'nochebuena-express':'Nochebuena Express','pinata-plazido':'La Piñata de Plázido','lluvia-de-regalos':'Lluvia de Regalos','penales-3d':'Penales 3D','reparto-plaza':'Reparto Plaza 3D','torre-de-cajas':'Torre de Cajas 3D','gusano-gloton':'El Gusano Glotón','burbujas-de-queso':'Burbujas de Queso','invasion-de-moscas':'Invasión de Moscas','pizza-en-bloques':'Pizza en Bloques','cocina-de-plazido':'La Cocina de Plázido','halloween':'La Cocina Embrujada','navidad':'La Gran Entrega Navideña','rosca':'La Rosca','loteria':'Lotería','penales':'Penales','memorama':'Memorama','pizza':'Arma tu Pizza'};
+const nom=s=>NOMBRES[s]||s||'(sin nombre)', fmt=n=>Number(n||0).toLocaleString('es-MX'), pct=(a,b)=>b?Math.round(a/b*100)+'%':'—';
+let dias=30, pin=sessionStorage.getItem('pp_admin')||'';
+async function cargar(){ const u=PP_API+'?accion=tablero&pin='+encodeURIComponent(pin)+'&dias='+dias; const r=await fetch(u).then(x=>x.json()); return r; }
+async function entrar(){ $('lmsg').textContent='Cargando…'; $('lmsg').classList.remove('err');
+  try{ const r=await cargar(); if(!r.ok){ $('lmsg').textContent=r.error==='accion desconocida'?'El Apps Script todavía no tiene el tablero: publica la versión nueva.':(r.error||'Error'); $('lmsg').classList.add('err'); sessionStorage.removeItem('pp_admin'); $('login').style.display='block'; $('app').style.display='none'; $('filtros').style.display='none'; return; }
+    sessionStorage.setItem('pp_admin',pin); $('login').style.display='none'; $('app').style.display='block'; $('filtros').style.display='flex'; pintar(r); }
+  catch(e){ $('lmsg').textContent='Sin conexión con el servidor.'; $('lmsg').classList.add('err'); } }
+$('entrar').onclick=()=>{ pin=$('pin').value.trim(); entrar(); }; $('pin').addEventListener('keydown',e=>{ if(e.key==='Enter'){ pin=$('pin').value.trim(); entrar(); } });
+document.querySelectorAll('#filtros button[data-d]').forEach(b=>b.onclick=()=>{ dias=+b.dataset.d; document.querySelectorAll('#filtros button[data-d]').forEach(x=>x.classList.toggle('on',x===b)); entrar(); });
+$('salir').onclick=()=>{ sessionStorage.removeItem('pp_admin'); location.reload(); };
+if(pin) entrar();
+
+// ---------- tooltip ----------
+const tip=$('tip'); function verTip(e,html){ tip.innerHTML=html; tip.style.opacity=1; const x=Math.min(innerWidth-tip.offsetWidth-8,e.clientX+12), y=e.clientY-tip.offsetHeight-10; tip.style.left=x+'px'; tip.style.top=(y<4?e.clientY+16:y)+'px'; } function ocultarTip(){ tip.style.opacity=0; }
+
+// ---------- columnas (una serie, eje en 0) ----------
+function ticks(max){ const p=Math.pow(10,Math.floor(Math.log10(Math.max(1,max)))); const paso=[1,2,5,10].map(k=>k*p).find(s=>max/s<=4)||p*10; const t=[]; for(let v=0;v<=max+paso*.001;v+=paso) t.push(v); if(t[t.length-1]<max) t.push(t[t.length-1]+paso); return t; }
+function columnas(el,datos,etq){ // datos: [[fechaISO,valor]]
+  const W=el.clientWidth||600, H=200, m={l:36,r:8,t:10,b:24}, n=datos.length, iw=W-m.l-m.r, ih=H-m.t-m.b;
+  const max=Math.max(1,...datos.map(d=>d[1])), tk=ticks(max), top=tk[tk.length-1], bw=Math.min(24,iw/n-2), paso=iw/n;
+  const y=v=>m.t+ih-v/top*ih; let s=`<svg width="${W}" height="${H}" role="img" aria-label="${etq}">`;
+  tk.forEach(v=>{ s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${m.l-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--text-secondary)">${fmt(v)}</text>`; });
+  const cada=Math.ceil(n/7);
+  datos.forEach((d,i)=>{ const x=m.l+i*paso+(paso-bw)/2, h=Math.max(0,ih-(y(d[1])-m.t)), r=Math.min(4,h);
+    if(d[1]>0) s+=`<path d="M${x},${m.t+ih} V${y(d[1])+r} Q${x},${y(d[1])} ${x+r},${y(d[1])} H${x+bw-r} Q${x+bw},${y(d[1])} ${x+bw},${y(d[1])+r} V${m.t+ih} Z" fill="var(--series-1)"/>`;
+    s+=`<rect x="${m.l+i*paso}" y="${m.t}" width="${paso}" height="${ih}" fill="transparent" data-i="${i}"/>`;
+    if(i%cada===0||i===n-1){ const f=new Date(d[0]+'T12:00:00'); s+=`<text x="${m.l+i*paso+paso/2}" y="${H-6}" text-anchor="middle" font-size="11" fill="var(--text-secondary)">${f.getDate()}/${f.getMonth()+1}</text>`; } });
+  s+='</svg>'; el.innerHTML=s;
+  el.querySelectorAll('rect[data-i]').forEach(r=>{ const d=datos[+r.dataset.i]; const f=new Date(d[0]+'T12:00:00').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});
+    r.addEventListener('mousemove',e=>{ r.setAttribute('fill','rgba(31,26,23,.05)'); verTip(e,`${f}<br>${fmt(d[1])} ${etq}`); }); r.addEventListener('mouseleave',()=>{ r.setAttribute('fill','transparent'); ocultarTip(); }); }); }
+// ---------- barras horizontales (una serie) ----------
+function barras(el,datos,etq){ if(!datos.length){ el.innerHTML='<div class="vacio">Sin datos en este periodo</div>'; return; }
+  const W=el.clientWidth||400, fila=30, lw=Math.min(170,W*.42), H=datos.length*fila+6, max=Math.max(1,...datos.map(d=>d[1])), iw=W-lw-56;
+  let s=`<svg width="${W}" height="${H}" role="img" aria-label="${etq}">`;
+  datos.forEach((d,i)=>{ const y=i*fila+5, w=Math.max(2,d[1]/max*iw), h=Math.min(18,fila-10), r=Math.min(4,w);
+    s+=`<text x="${lw-8}" y="${y+h/2+4}" text-anchor="end" font-size="12" font-weight="800" fill="var(--text-primary)">${d[0].length>24?d[0].slice(0,23)+'…':d[0]}</text>`;
+    s+=`<path d="M${lw},${y} H${lw+w-r} Q${lw+w},${y} ${lw+w},${y+r} V${y+h-r} Q${lw+w},${y+h} ${lw+w-r},${y+h} H${lw} Z" fill="var(--series-1)"/>`;
+    s+=`<text x="${lw+w+6}" y="${y+h/2+4}" font-size="12" font-weight="800" fill="var(--text-primary)">${fmt(d[1])}</text>`;
+    s+=`<rect x="0" y="${y-5}" width="${W}" height="${fila}" fill="transparent" data-i="${i}"/>`; });
+  s+='</svg>'; el.innerHTML=s; el.querySelectorAll('rect[data-i]').forEach(r=>{ const d=datos[+r.dataset.i]; r.addEventListener('mousemove',e=>verTip(e,`${d[0]}<br>${fmt(d[1])} ${etq}`)); r.addEventListener('mouseleave',ocultarTip); }); }
+// ---------- tabla ordenable con barritas ----------
+function tabla(el,cols,filas,orden){ let o=orden||{k:cols[1].k,d:-1};
+  const dibuja=()=>{ const f=[...filas].sort((a,b)=>{ const x=a[o.k],y=b[o.k]; return (typeof x==='string'?x.localeCompare(y):(x-y))*o.d; });
+    const max={}; cols.forEach(c=>{ if(c.barra) max[c.k]=Math.max(1,...filas.map(r=>r[c.k]||0)); });
+    el.innerHTML=`<table><thead><tr>${cols.map(c=>`<th class="${c.num?'num':''}" data-k="${c.k}">${c.t}${o.k===c.k?(o.d<0?' ▼':' ▲'):''}</th>`).join('')}</tr></thead><tbody>${f.map(r=>`<tr>${cols.map(c=>`<td class="${c.num?'num':''}">${c.f?c.f(r[c.k],r):r[c.k]}${c.barra?`<span class="barra" style="width:${Math.round((r[c.k]||0)/max[c.k]*60)}px"></span>`:''}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    el.querySelectorAll('th').forEach(th=>th.onclick=()=>{ const k=th.dataset.k; o={k,d:o.k===k?-o.d:-1}; dibuja(); }); };
+  dibuja(); }
+
+let ultimo=null; function pintar(r){ ultimo=r; const k=r.kpi; $('gen').textContent=`Últimos ${r.dias} días · actualizado ${new Date(r.generado).toLocaleString('es-MX',{dateStyle:'medium',timeStyle:'short'})}`;
+  const tiles=[
+    ['Visitas por cupón',fmt(k.canjes),`${pct(k.canjes,k.cupones)} de ${fmt(k.cupones)} cupones emitidos`,true],
+    ['Clientes que regresaron',fmt(k.regresaron),`${pct(k.regresaron,k.clientesConCanje)} de quienes ya canjearon`+(k.diasEntreVisitas?` · cada ${k.diasEntreVisitas} días`:''),true],
+    ['Partidas',fmt(k.partidas),`${fmt(k.jugadores)} jugadores distintos`],
+    ['Registros nuevos',fmt(k.registrosNuevos),`${fmt(k.registros)} en total · ${pct(k.aceptanPromos,k.registros)} aceptan promos`],
+    ['Pizzas gratis (pasaporte)',fmt(k.pizzasGratis),'entregadas en el periodo'],
+    ['Personajes creados',fmt(k.avatares),'Familia Pizzas Plaza (total)']];
+  $('kpis').innerHTML=tiles.map(([l,n,s,d])=>`<div class="kpi ${d?'dest':''}"><div class="l">${l}</div><div class="n">${n}</div><div class="s">${s}</div></div>`).join('');
+  const D=Object.entries(r.porDia); columnas($('cPartidas'),D.map(([d,v])=>[d,v.partidas]),'partidas'); columnas($('cCanjes'),D.map(([d,v])=>[d,v.canjes]),'canjes');
+  const F=r.frecuencia||{}; barras($('cFrec'),[1,2,3,4,5].filter(n=>F[n]).map(n=>[n===5?'5 o más visitas':n===1?'1 visita':n+' visitas',F[n]]),'clientes');
+  barras($('cJuegos'),r.juegos.slice(0,10).map(j=>[nom(j.juego),j.partidas]),'partidas');
+  barras($('cPremios'),Object.entries(r.premios).sort((a,b)=>b[1]-a[1]),'canjes');
+  const S=Object.entries(r.sucursales).map(([s,v])=>({s,...v,tasa:v.cupones?v.canjes/v.cupones:0}));
+  tabla($('tSuc'),[{k:'s',t:'Sucursal'},{k:'canjes',t:'Canjes (visitas)',num:1,barra:1,f:fmt},{k:'cupones',t:'Cupones emitidos',num:1,f:fmt},{k:'tasa',t:'% canje',num:1,f:v=>Math.round(v*100)+'%'},{k:'registros',t:'Registros nuevos',num:1,f:fmt},{k:'pizzas',t:'Pizzas gratis',num:1,f:fmt}],S);
+  tabla($('tJuegos'),[{k:'n',t:'Juego'},{k:'partidas',t:'Partidas',num:1,barra:1,f:fmt},{k:'jugadores',t:'Jugadores',num:1,f:fmt},{k:'ganadas',t:'Ganadas',num:1,f:fmt},{k:'cupones',t:'Cupones',num:1,f:fmt}],r.juegos.map(j=>({...j,n:nom(j.juego)}))); }
+let rz; addEventListener('resize',()=>{ clearTimeout(rz); rz=setTimeout(()=>{ if(ultimo) pintar(ultimo); },200); });
+</script>
+</body>
+</html>
