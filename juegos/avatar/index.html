@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Luna Plaza Park · Crea tu personaje</title>
+<link rel="icon" href="../img/icono.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../pp.css">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% 0%,#3B2A8C,#140E36 60%);font-family:Nunito,system-ui,sans-serif;color:#fff}
+.top{display:flex;align-items:center;justify-content:space-between;padding:10px 12px}
+.plato{background:#FFF8E7;border-radius:10px;padding:4px 8px;display:flex}.plato img{height:24px}
+.bot{font-family:'Bebas Neue',Impact,sans-serif;font-size:17px;letter-spacing:1px;border:2px solid #FCC10C;background:rgba(66,41,19,.92);color:#FCC10C;border-radius:12px;padding:5px 10px 3px;text-decoration:none;cursor:pointer}
+h1{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(34px,10vw,48px);margin:0;text-align:center;color:#FCC10C;letter-spacing:2px;line-height:1;text-shadow:0 4px 0 #C8102E}
+.sub{text-align:center;font-weight:800;font-size:14px;opacity:.85;margin:4px 16px 0}
+.esc{position:relative;width:min(54vw,270px);aspect-ratio:1;margin:6px auto 0}
+.esc canvas{width:100%;height:100%;display:block}
+.esc .piso{position:absolute;left:10%;right:10%;bottom:2%;height:12%;border-radius:50%;background:radial-gradient(rgba(252,193,12,.35),transparent 70%)}
+.dado{position:absolute;right:-6px;top:6px;width:50px;height:50px;border-radius:50%;border:3px solid #FCC10C;background:#422913;font-size:24px;cursor:pointer}
+.nombre{display:flex;justify-content:center;margin:6px 0}
+.nombre input{font-family:'Bebas Neue',Impact,sans-serif;font-size:26px;letter-spacing:1px;text-align:center;width:min(78vw,300px);border-radius:14px;border:3px solid #FCC10C;background:#FFF8E7;color:#422913;padding:6px 10px 3px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;font-weight:900;font-size:14px;border-radius:12px;border:2px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#fff;padding:7px 12px;cursor:pointer}
+.tab.on{background:#FCC10C;color:#422913;border-color:#FCC10C}
+.ops{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;padding:4px 12px 120px;max-width:620px;margin:0 auto}
+.op{background:rgba(255,255,255,.08);border:3px solid transparent;border-radius:16px;padding:4px;cursor:pointer;text-align:center;font-weight:800;font-size:11px;color:#fff}
+.op.on{border-color:#FCC10C;background:rgba(252,193,12,.18)}
+.op canvas{width:100%;aspect-ratio:1;display:block}
+.op .sw{width:100%;aspect-ratio:1;border-radius:12px;border:3px solid rgba(0,0,0,.35)}
+.pie{position:fixed;left:0;right:0;bottom:0;padding:10px 12px 14px;background:linear-gradient(0deg,#140E36 60%,rgba(20,14,54,0));display:flex;justify-content:center}
+.guardar{font-family:'Bebas Neue',Impact,sans-serif;font-size:26px;white-space:nowrap;border:0;border-radius:16px;padding:10px 0 7px;width:min(92vw,420px);background:linear-gradient(180deg,#E8253F,#A50C22);color:#fff;box-shadow:0 0 22px rgba(232,37,63,.55);cursor:pointer}
+#msg{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.8);opacity:0;transition:all .25s;z-index:9;background:#FFF8E7;color:#422913;border:4px solid #FCC10C;border-radius:20px;padding:16px 20px;text-align:center;font-weight:900;width:min(86vw,340px);pointer-events:none}
+#msg.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#msg b{font-family:'Bebas Neue',Impact;font-size:32px;display:block;color:#C8102E}
+</style>
+</head>
+<body>
+<div class="top"><div class="plato"><img src="../img/logo.png" alt="Pizzas Plaza"></div><a class="bot" href="../parque/">🎡 AL PARQUE</a></div>
+<h1>CREA TU PERSONAJE</h1>
+<p class="sub">Únete a la Familia Pizzas Plaza y pasea por Luna Plaza Park con Plázido y sus amigos</p>
+<div class="esc"><div class="piso"></div><canvas id="prev" width="420" height="420"></canvas><button class="dado" id="bDado" title="Al azar">🎲</button></div>
+<div class="nombre"><input id="apodo" maxlength="14" placeholder="TU APODO" autocomplete="off"></div>
+<div class="tabs" id="tabs"></div>
+<div class="ops" id="ops"></div>
+<div class="pie"><button class="guardar" id="bGuardar">💾 GUARDAR PERSONAJE</button></div>
+<div id="msg"></div>
+
+<script src="../config.js"></script>
+<script src="../pasaporte.js"></script>
+<script src="../pp.js"></script>
+<script src="../avatar.js"></script>
+<script>
+PP.init({clave:'avatar',base:'../',esPortal:true,titulo:'🎟️ Tu cupón',img:'../img/saludando.webp',alRejugar:()=>{}});
+const $=id=>document.getElementById(id);
+const TABS=[['forma','🍕 Cuerpo'],['color','🎨 Color'],['ojos','👀 Ojos'],['boca','👄 Boca'],['bigote','🥸 Bigote'],['sombrero','🎩 Sombrero'],['extra','🕶️ Extras'],['zapatos','👟 Zapatos']];
+let cfg=AVATAR.aleatorio(), tab='forma';
+try{ const g=JSON.parse(PP.store.get('pp_avatar')||'null'); if(g&&g.cfg){ cfg=AVATAR.valido(g.cfg); $('apodo').value=g.apodo||''; } }catch(e){}
+if(!$('apodo').value){ const n=(PP.store.get('pp_nombre')||'').split(' ')[0]; $('apodo').value=n.slice(0,14); }
+// trae el personaje guardado (si lo creó en otro celular)
+(async()=>{ const tel=PP.store.get('pp_tel'); if(!tel) return; try{ const r=await PP.api({accion:'miavatar',tel}); if(r&&r.ok&&r.existe&&!PP.store.get('pp_avatar')){ cfg=AVATAR.valido(r.cfg); $('apodo').value=r.apodo||''; pintarOps(); } }catch(e){} })();
+
+// vista previa animada
+const pv=$('prev').getContext('2d'); let t0=performance.now();
+function anima(){ AVATAR.dibujar(pv,cfg,420,(performance.now()-t0)/1000); requestAnimationFrame(anima); } anima();
+
+function pintarTabs(){ $('tabs').innerHTML=TABS.map(([k,n])=>`<button class="tab ${k===tab?'on':''}" data-k="${k}">${n}</button>`).join(''); document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ tab=b.dataset.k; pintarTabs(); pintarOps(); }); }
+function pintarOps(){ const lista=AVATAR.OPC[tab]; const esColor=tab==='color'||tab==='zapatos';
+  $('ops').innerHTML=lista.map((v,i)=>`<div class="op ${cfg[tab]===i?'on':''}" data-i="${i}">${esColor?`<div class="sw" style="background:${v}"></div>`:`<canvas width="160" height="160"></canvas>`}${esColor?'':`<div>${v}</div>`}</div>`).join('');
+  document.querySelectorAll('.op').forEach(o=>{ const i=+o.dataset.i; const c=o.querySelector('canvas'); if(c) AVATAR.dibujar(c.getContext('2d'),Object.assign({},cfg,{[tab]:i}),160,0,{quieto:true});
+    o.onclick=()=>{ cfg[tab]=i; document.querySelectorAll('.op').forEach(x=>x.classList.toggle('on',x===o)); SND.t&&SND.t(700+i*40,.05,'triangle',.04); }; }); }
+pintarTabs(); pintarOps();
+$('bDado').onclick=()=>{ cfg=AVATAR.aleatorio(); pintarOps(); SND.on&&SND.on(); SND.seq&&SND.seq([523,659,784],'triangle',.05,.04); };
+
+function mensaje(t,s,ms=2200){ const m=$('msg'); m.innerHTML=`<b>${t}</b>${s}`; m.classList.add('on'); clearTimeout(m._t); m._t=setTimeout(()=>m.classList.remove('on'),ms); }
+$('apodo').addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 _.-]/g,'').slice(0,14); });
+$('bGuardar').onclick=()=>{ SND.on&&SND.on(); const apodo=$('apodo').value.trim(); if(apodo.length<2){ mensaje('¡FALTA TU APODO!','Escribe cómo quieres que te vean en el parque.'); $('apodo').focus(); return; }
+  PP.antesDeJugar(async()=>{ const tel=PP.store.get('pp_tel'); $('bGuardar').disabled=true; $('bGuardar').textContent='GUARDANDO…';
+    try{ const r=await PP.api({accion:'avatar',tel,apodo,cfg:JSON.stringify(cfg)});
+      if(r&&r.ok){ PP.store.set('pp_avatar',JSON.stringify({apodo,cfg})); SND.gana&&SND.gana(); mensaje('¡BIENVENIDO A LA FAMILIA!',`${apodo} ya pasea por Luna Plaza Park 🎡`,1800); setTimeout(()=>location.href='../parque/',1900); }
+      else mensaje('UPS',(r&&r.error)||'No se pudo guardar. Intenta de nuevo.'); }
+    catch(e){ mensaje('SIN CONEXIÓN','Revisa tu internet e intenta de nuevo.'); }
+    $('bGuardar').disabled=false; $('bGuardar').textContent='💾 GUARDAR PERSONAJE'; }); };
+</script>
+</body>
+</html>
