@@ -38,7 +38,7 @@ h1{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(34px,10vw,48px);ma
 </style>
 </head>
 <body>
-<div class="top"><div class="plato"><img src="../img/logo.png" alt="Pizzas Plaza"></div><a class="bot" href="../parque/">🎡 AL PARQUE</a></div>
+<div class="top"><div class="plato"><img src="../img/logo.png" alt="Pizzas Plaza"></div><a class="bot" href="../">🎡 AL PARQUE</a></div>
 <h1>CREA TU PERSONAJE</h1>
 <p class="sub">Únete a la Familia Pizzas Plaza y pasea por Luna Plaza Park con Plázido y sus amigos</p>
 <div class="esc"><div class="piso"></div><canvas id="prev" width="420" height="420"></canvas><button class="dado" id="bDado" title="Al azar">🎲</button></div>
@@ -80,9 +80,9 @@ $('bGuardar').onclick=()=>{ SND.on&&SND.on(); const apodo=$('apodo').value.trim(
   PP.antesDeJugar(async()=>{ const tel=PP.store.get('pp_tel'); $('bGuardar').disabled=true; $('bGuardar').textContent='GUARDANDO…';
     PP.store.set('pp_avatar',JSON.stringify({apodo,cfg,pendiente:true})); // siempre queda guardado en este celular
     let r=null, err=''; try{ r=await PP.api({accion:'avatar',tel,apodo,cfg:JSON.stringify(cfg)}); }catch(e){ err='sin conexión'; }
-    if(r&&r.ok){ PP.store.set('pp_avatar',JSON.stringify({apodo,cfg})); SND.gana&&SND.gana(); mensaje('¡BIENVENIDO A LA FAMILIA!',`${apodo} ya pasea por Luna Plaza Park 🎡`,1800); setTimeout(()=>location.href='../parque/',1900); }
+    if(r&&r.ok){ PP.store.set('pp_avatar',JSON.stringify({apodo,cfg})); SND.gana&&SND.gana(); mensaje('¡BIENVENIDO A LA FAMILIA!',`${apodo} ya pasea por Luna Plaza Park 🎡`,1800); setTimeout(()=>location.href='../',1900); }
     else if(r&&r.error&&/apodo/i.test(r.error)){ PP.store.set('pp_avatar',''); mensaje('UPS',r.error); }
-    else { SND.gana&&SND.gana(); mensaje('¡GUARDADO EN TU CELULAR!',`${apodo} ya pasea por el parque. Se subirá al sistema en cuanto haya conexión.<br><small style="opacity:.6">(${(r&&r.error)||err||'sin respuesta'})</small>`,2600); setTimeout(()=>location.href='../parque/',2700); }
+    else { SND.gana&&SND.gana(); mensaje('¡GUARDADO EN TU CELULAR!',`${apodo} ya pasea por el parque. Se subirá al sistema en cuanto haya conexión.<br><small style="opacity:.6">(${(r&&r.error)||err||'sin respuesta'})</small>`,2600); setTimeout(()=>location.href='../',2700); }
     $('bGuardar').disabled=false; $('bGuardar').textContent='💾 GUARDAR PERSONAJE'; }); };
 </script>
 </body>
