@@ -327,6 +327,7 @@ function ponAvatar(apodo,cfg,yo){ const fr=cuadros(cfg); const sp=new THREE.Spri
 let miAv=null;
 async function familia(){ let mio=null; try{ mio=JSON.parse(PP.store.get('pp_avatar')||'null'); }catch(e){}
   const tel=PP.store.get('pp_tel');
+  if(mio&&mio.pendiente&&tel){ PP.api({accion:'avatar',tel,apodo:mio.apodo,cfg:JSON.stringify(mio.cfg)}).then(r=>{ if(r&&r.ok) PP.store.set('pp_avatar',JSON.stringify({apodo:mio.apodo,cfg:mio.cfg})); }).catch(()=>{}); }
   if(!mio&&tel){ try{ const r=await PP.api({accion:'miavatar',tel}); if(r&&r.ok&&r.existe){ mio={apodo:r.apodo,cfg:r.cfg}; PP.store.set('pp_avatar',JSON.stringify(mio)); } }catch(e){} }
   if(mio&&mio.cfg){ miAv=ponAvatar(mio.apodo||'Yo',AVATAR.valido(mio.cfg),true); $('bAvatar').textContent='🧑 '+String(mio.apodo||'YO').toUpperCase().slice(0,10); }
   try{ const r=await PP.api({accion:'avatares'}); if(r&&r.ok&&Array.isArray(r.avatares)){ r.avatares.filter(a=>!mio||a.apodo!==mio.apodo).slice(0,14).forEach(a=>ponAvatar(a.apodo,AVATAR.valido(a.cfg),false)); } }catch(e){} }

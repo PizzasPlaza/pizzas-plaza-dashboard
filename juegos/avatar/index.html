@@ -78,10 +78,11 @@ function mensaje(t,s,ms=2200){ const m=$('msg'); m.innerHTML=`<b>${t}</b>${s}`; 
 $('apodo').addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 _.-]/g,'').slice(0,14); });
 $('bGuardar').onclick=()=>{ SND.on&&SND.on(); const apodo=$('apodo').value.trim(); if(apodo.length<2){ mensaje('¡FALTA TU APODO!','Escribe cómo quieres que te vean en el parque.'); $('apodo').focus(); return; }
   PP.antesDeJugar(async()=>{ const tel=PP.store.get('pp_tel'); $('bGuardar').disabled=true; $('bGuardar').textContent='GUARDANDO…';
-    try{ const r=await PP.api({accion:'avatar',tel,apodo,cfg:JSON.stringify(cfg)});
-      if(r&&r.ok){ PP.store.set('pp_avatar',JSON.stringify({apodo,cfg})); SND.gana&&SND.gana(); mensaje('¡BIENVENIDO A LA FAMILIA!',`${apodo} ya pasea por Luna Plaza Park 🎡`,1800); setTimeout(()=>location.href='../parque/',1900); }
-      else mensaje('UPS',(r&&r.error)||'No se pudo guardar. Intenta de nuevo.'); }
-    catch(e){ mensaje('SIN CONEXIÓN','Revisa tu internet e intenta de nuevo.'); }
+    PP.store.set('pp_avatar',JSON.stringify({apodo,cfg,pendiente:true})); // siempre queda guardado en este celular
+    let r=null, err=''; try{ r=await PP.api({accion:'avatar',tel,apodo,cfg:JSON.stringify(cfg)}); }catch(e){ err='sin conexión'; }
+    if(r&&r.ok){ PP.store.set('pp_avatar',JSON.stringify({apodo,cfg})); SND.gana&&SND.gana(); mensaje('¡BIENVENIDO A LA FAMILIA!',`${apodo} ya pasea por Luna Plaza Park 🎡`,1800); setTimeout(()=>location.href='../parque/',1900); }
+    else if(r&&r.error&&/apodo/i.test(r.error)){ PP.store.set('pp_avatar',''); mensaje('UPS',r.error); }
+    else { SND.gana&&SND.gana(); mensaje('¡GUARDADO EN TU CELULAR!',`${apodo} ya pasea por el parque. Se subirá al sistema en cuanto haya conexión.<br><small style="opacity:.6">(${(r&&r.error)||err||'sin respuesta'})</small>`,2600); setTimeout(()=>location.href='../parque/',2700); }
     $('bGuardar').disabled=false; $('bGuardar').textContent='💾 GUARDAR PERSONAJE'; }); };
 </script>
 </body>
